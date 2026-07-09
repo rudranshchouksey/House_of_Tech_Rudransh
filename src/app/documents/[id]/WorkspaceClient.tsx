@@ -3,6 +3,7 @@
 import { useSyncEngine } from '@/hooks/useSyncEngine';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import VersionTimeline from '@/components/VersionTimeline';
+import { AiSidebar } from '@/components/AiSidebar';
 
 interface WorkspaceClientProps {
   documentId: string;
@@ -20,8 +21,13 @@ export function WorkspaceClient({ documentId, currentUser }: WorkspaceClientProp
       </main>
 
       {/* Sidebar Area */}
-      <aside className="w-80 flex-shrink-0 bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800 z-20 shadow-[-4px_0_15px_rgba(0,0,0,0.03)] dark:shadow-none overflow-hidden">
-        <VersionTimeline documentId={documentId} />
+      <aside className="w-80 flex-shrink-0 flex flex-col bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800 z-20 shadow-[-4px_0_15px_rgba(0,0,0,0.03)] dark:shadow-none overflow-hidden h-full">
+        <div className="flex-1 overflow-y-auto">
+          <AiSidebar doc={doc} documentId={documentId} />
+        </div>
+        <div className="flex-1 overflow-y-auto border-t border-gray-200 dark:border-gray-800">
+          <VersionTimeline documentId={documentId} />
+        </div>
       </aside>
     </div>
   );
