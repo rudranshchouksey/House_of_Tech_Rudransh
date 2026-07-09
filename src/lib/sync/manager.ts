@@ -106,6 +106,23 @@ export class SyncManager {
   }
 
   /**
+   * Fetch all pending updates from the outbox for this document.
+   */
+  public async getPendingUpdates() {
+    return db.outbox
+      .where('documentId')
+      .equals(this.documentId)
+      .sortBy('timestamp');
+  }
+
+  /**
+   * Delete specific updates from the outbox (used after a successful sync).
+   */
+  public async clearOutbox(ids: number[]) {
+    await db.outbox.bulkDelete(ids);
+  }
+
+  /**
    * Returns the underlying Yjs document instance.
    */
   public getDocument(): Y.Doc {
