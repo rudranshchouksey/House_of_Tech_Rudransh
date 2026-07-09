@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import * as Y from 'yjs';
 import { Bot, Sparkles, Loader2, GitCommitHorizontal } from 'lucide-react';
-import { useCompletion } from 'ai/react';
+import { useCompletion } from '@ai-sdk/react';
 
 interface AiSidebarProps {
   doc: Y.Doc | null;
@@ -41,7 +41,7 @@ export function AiSidebar({ doc, documentId }: AiSidebarProps) {
     }
   };
 
-  const currentText = doc?.getText('content').toString() || '';
+  const currentText = doc?.getXmlFragment('content').toString() || '';
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800 text-sm">
