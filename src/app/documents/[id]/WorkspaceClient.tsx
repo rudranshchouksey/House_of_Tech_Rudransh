@@ -11,7 +11,20 @@ interface WorkspaceClientProps {
 }
 
 export function WorkspaceClient({ documentId, currentUser }: WorkspaceClientProps) {
-  const { doc, status } = useSyncEngine(documentId);
+  const syncEngineState = useSyncEngine(documentId);
+  const doc = syncEngineState?.doc;
+  const status = syncEngineState?.status || 'OFFLINE';
+
+  if (!doc) {
+    return (
+      <div className="flex flex-1 items-center justify-center h-full">
+        <div className="flex flex-col items-center gap-4 text-gray-500">
+          <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+          <p>Initializing local workspace...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-1 overflow-hidden">

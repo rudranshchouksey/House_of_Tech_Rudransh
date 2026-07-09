@@ -1,11 +1,14 @@
 'use client';
 
+import { useMemo } from 'react';
+
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Collaboration from '@tiptap/extension-collaboration';
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import Placeholder from '@tiptap/extension-placeholder';
 import * as Y from 'yjs';
+import { Awareness } from 'y-protocols/awareness';
 import { EditorToolbar } from './EditorToolbar';
 import { SyncStatus } from '@/lib/sync/engine';
 
@@ -16,7 +19,10 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({ doc, syncStatus, currentUser }: RichTextEditorProps) {
+  const awareness = useMemo(() => doc ? new Awareness(doc) : null, [doc]);
+
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         history: false, // History is handled by Yjs
@@ -32,17 +38,7 @@ export function RichTextEditor({ doc, syncStatus, currentUser }: RichTextEditorP
         }),
         CollaborationCursor.configure({
           provider: {
-            // Mock provider to satisfy TipTap's cursor requirements since we handle Sync manually
-            on: () => {},
-            off: () => {},
-            awareness: {
-              setLocalStateField: () => {},
-              getStates: () => new Map(),
-              on: () => {},
-              off: () => {},
-              getLocalState: () => ({}),
-              setLocalState: () => {}
-            } as any
+            awareness
           } as any,
           user: {
             name: currentUser.name,
