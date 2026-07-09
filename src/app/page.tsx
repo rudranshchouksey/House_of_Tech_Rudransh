@@ -45,7 +45,7 @@ export default async function Home() {
             A local-first, blazing fast text editor powered by CRDTs, Yjs, TipTap, and AI. Work offline seamlessly and sync instantly when reconnected.
           </p>
           <Link 
-            href="/api/auth/signin" 
+            href="/login" 
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full font-medium transition-colors text-lg"
           >
             <LogIn size={20} />
