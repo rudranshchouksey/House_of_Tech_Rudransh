@@ -96,6 +96,7 @@ model DocumentVersion {
   id            String   @id @default(cuid())
   documentId    String
   versionNumber Int
+  commitMessage String?
   snapshotBlob  Bytes    // Binary snapshot of the state at this version
   createdById   String
   timestamp     DateTime @default(now())
