@@ -16,7 +16,7 @@ export function AiSidebar({ doc, documentId }: AiSidebarProps) {
   const [summary, setSummary] = useState('');
   const [loadingSummary, setLoadingSummary] = useState(false);
 
-  const { completion, handleSubmit, isLoading, error } = useCompletion({
+  const { completion, complete, isLoading, error } = useCompletion({
     api: '/api/ai/autocomplete',
   });
 
@@ -75,7 +75,7 @@ export function AiSidebar({ doc, documentId }: AiSidebarProps) {
               {currentText.slice(-200) || "Start typing in the document to generate context..."}
             </div>
             
-            <form onSubmit={(e) => { e.preventDefault(); handleSubmit(e, { body: { prompt: currentText.slice(-500) } })}}>
+            <form onSubmit={(e) => { e.preventDefault(); complete(currentText.slice(-500)); }}>
                <button 
                 type="submit"
                 disabled={isLoading || !currentText}
