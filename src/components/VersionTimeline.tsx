@@ -17,10 +17,13 @@ export default function VersionTimeline({ documentId }: { documentId: string }) 
   const [previewVersionId, setPreviewVersionId] = useState<string | null>(null);
   const [previewContent, setPreviewContent] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showSaveForm, setShowSaveForm] = useState(false);
+  const [commitMessage, setCommitMessage] = useState('');
   
   const { doc } = useSyncEngine(documentId);
 
-  useEffect(() => {
+  const fetchVersions = () => {
     fetch(`/api/documents/${documentId}/versions`)
       .then(res => res.json())
       .then(data => {
@@ -29,6 +32,10 @@ export default function VersionTimeline({ documentId }: { documentId: string }) 
         }
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchVersions();
   }, [documentId]);
 
   const handlePreview = async (versionId: string) => {
@@ -72,12 +79,73 @@ export default function VersionTimeline({ documentId }: { documentId: string }) 
     }
   };
 
+  const handleSaveVersion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    try {
+      const res = await fetch(`/api/documents/${documentId}/versions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ commitMessage })
+      });
+      if (res.ok) {
+        setCommitMessage('');
+        setShowSaveForm(false);
+        fetchVersions();
+      } else {
+        alert('Failed to save version.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error saving version.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   if (loading) return <div className="p-4 text-gray-500">Loading history...</div>;
 
   return (
     <div className="flex h-full border-l border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
-      <div className="w-80 overflow-y-auto p-4 border-r border-gray-200 dark:border-gray-800">
-        <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Version History</h2>
+      <div className="w-80 overflow-y-auto p-4 border-r border-gray-200 dark:border-gray-800 flex flex-col h-full">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Version History</h2>
+          <button 
+            onClick={() => setShowSaveForm(!showSaveForm)}
+            className="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300 rounded hover:bg-indigo-200 dark:hover:bg-indigo-800 transition"
+          >
+            + Save
+          </button>
+        </div>
+
+        {showSaveForm && (
+          <form onSubmit={handleSaveVersion} className="mb-6 p-3 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
+            <input 
+              type="text"
+              placeholder="Commit message..."
+              value={commitMessage}
+              onChange={(e) => setCommitMessage(e.target.value)}
+              className="w-full text-sm p-2 border border-gray-300 dark:border-gray-600 rounded bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white mb-2 focus:ring-2 focus:ring-indigo-500 outline-none"
+              required
+            />
+            <div className="flex gap-2">
+              <button 
+                type="submit"
+                disabled={isSaving}
+                className="flex-1 bg-indigo-600 text-white text-xs font-medium py-1.5 rounded hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {isSaving ? 'Saving...' : 'Save'}
+              </button>
+              <button 
+                type="button"
+                onClick={() => setShowSaveForm(false)}
+                className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-medium py-1.5 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
         
         {versions.length === 0 ? (
           <p className="text-sm text-gray-500">No versions captured yet.</p>

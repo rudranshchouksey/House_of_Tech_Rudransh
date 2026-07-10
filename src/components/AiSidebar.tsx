@@ -16,7 +16,7 @@ export function AiSidebar({ doc, documentId }: AiSidebarProps) {
   const [summary, setSummary] = useState('');
   const [loadingSummary, setLoadingSummary] = useState(false);
 
-  const { completion, handleSubmit, isLoading } = useCompletion({
+  const { completion, handleSubmit, isLoading, error } = useCompletion({
     api: '/api/ai/autocomplete',
   });
 
@@ -86,7 +86,13 @@ export function AiSidebar({ doc, documentId }: AiSidebarProps) {
               </button>
             </form>
 
-            {completion && (
+            {error && (
+              <div className="mt-4 p-3 border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800/50 rounded-lg text-red-800 dark:text-red-200 text-xs">
+                <p className="font-semibold mb-1">Error:</p>
+                {error.message || 'Failed to generate continuation.'}
+              </div>
+            )}
+            {completion && !error && (
               <div className="mt-4 p-3 border border-indigo-100 bg-indigo-50 dark:bg-indigo-900/20 dark:border-indigo-800/50 rounded-lg text-gray-800 dark:text-gray-200">
                 <p className="font-semibold text-xs mb-1 text-indigo-600 dark:text-indigo-400">AI Suggestion:</p>
                 {completion}

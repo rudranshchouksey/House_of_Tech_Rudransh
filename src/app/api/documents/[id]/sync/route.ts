@@ -10,6 +10,12 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
   return withDocumentAuth(req, id, Role.EDITOR, async (req, userId) => {
     try {
       const body = await req.arrayBuffer();
+      
+      // Validate payload size (e.g. max 5MB per sync chunk) to prevent DoS
+      if (body.byteLength > 5 * 1024 * 1024) {
+        return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
+      }
+      
       const payload = new Uint8Array(body);
       
       const document = await prisma.document.findUnique({
@@ -37,7 +43,13 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
 
       // 1. Apply client's updates if the payload is not empty
       if (payload.length > 0) {
-        Y.applyUpdate(serverDoc, payload);
+        try {
+          // Strictly validate that this is a valid Yjs update format
+          Y.applyUpdate(serverDoc, payload);
+        } catch (err) {
+          console.error('[SYNC_INVALID_PAYLOAD]', err);
+          return NextResponse.json({ error: 'Invalid document update payload' }, { status: 400 });
+        }
         
         // Save the merged state back to DB
         const newBinaryState = Y.encodeStateAsUpdate(serverDoc);
