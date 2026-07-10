@@ -5,18 +5,10 @@ import { useMemo } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Collaboration from '@tiptap/extension-collaboration';
-import { CollaborationCursor } from '@tiptap/extension-collaboration-cursor';
-import { ySyncPluginKey as prosemirrorSyncKey } from 'y-prosemirror';
-import { ySyncPluginKey as tiptapSyncKey } from '@tiptap/y-tiptap';
 import Placeholder from '@tiptap/extension-placeholder';
 import * as Y from 'yjs';
-import { Awareness } from 'y-protocols/awareness';
 import { EditorToolbar } from './EditorToolbar';
 import { SyncStatus } from '@/lib/sync/engine';
-
-// Monkey patch to fix version mismatch between Tiptap 3 and y-prosemirror
-// This ensures CollaborationCursor can find the sync plugin state
-(tiptapSyncKey as any).key = (prosemirrorSyncKey as any).key;
 
 interface RichTextEditorProps {
   doc: Y.Doc | null;
@@ -25,8 +17,6 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({ doc, syncStatus, currentUser }: RichTextEditorProps) {
-  const awareness = useMemo(() => doc ? new Awareness(doc) : null, [doc]);
-
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -42,15 +32,6 @@ export function RichTextEditor({ doc, syncStatus, currentUser }: RichTextEditorP
           document: doc,
           field: 'content',
         }),
-        CollaborationCursor.configure({
-          provider: {
-            awareness
-          } as any,
-          user: {
-            name: currentUser.name,
-            color: currentUser.color,
-          },
-        })
       ] : []),
     ],
     editorProps: {

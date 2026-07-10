@@ -27,6 +27,8 @@ export function useSyncEngine(documentId: string) {
         
         engineRef.current = engine;
         engine.start();
+      } else {
+        manager.getDocument().destroy();
       }
     };
 
