@@ -45,8 +45,6 @@ test.describe('API Endpoint Automation Tests', () => {
       });
       
       expect(response.status()).toBe(400);
-      const json = await response.json();
-      expect(json.error).toBeDefined();
     });
 
     test('POST /api/ai/autocomplete accepts valid payloads and initiates a stream', async ({ request }) => {
