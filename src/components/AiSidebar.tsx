@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import * as Y from 'yjs';
-import { Bot, Sparkles, Loader2, GitCommitHorizontal, MessageSquare, PenTool, Languages } from 'lucide-react';
-import { useCompletion } from '@ai-sdk/react';
+import { Bot, Sparkles, Loader2, GitCommitHorizontal, MessageSquare, PenTool, Languages, Send, Plus } from 'lucide-react';
+import { DefaultChatTransport } from 'ai';
+import { useCompletion, useChat } from '@ai-sdk/react';
 
 interface AiSidebarProps {
   doc: Y.Doc | null;
@@ -18,9 +19,25 @@ export function AiSidebar({ doc, documentId }: AiSidebarProps) {
   const [summary, setSummary] = useState('');
   const [loadingSummary, setLoadingSummary] = useState(false);
 
-  const { completion, complete, isLoading, error } = useCompletion({
+  const { completion, complete, isLoading: isAutocompleteLoading, error } = useCompletion({
     api: '/api/ai/autocomplete',
   });
+
+  const [input, setInput] = useState('');
+  
+  const [transport] = useState(() => new DefaultChatTransport({ api: '/api/chat' }));
+  const { messages, sendMessage, status } = useChat({
+    transport
+  });
+  
+  const isChatLoading = status === 'streaming' || status === 'submitted';
+
+  const handleChatSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    sendMessage({ role: 'user', content: input });
+    setInput('');
+  };
 
   const handleSummarize = async () => {
     if (!versionId) return;
@@ -65,6 +82,13 @@ export function AiSidebar({ doc, documentId }: AiSidebarProps) {
     };
   }, [doc]);
 
+  const insertIntoEditor = (text: string) => {
+    // Basic way to insert at end if we don't have direct editor access, 
+    // but a better way is to pass a callback or just use a custom event.
+    // For now, let's use window.dispatchEvent
+    window.dispatchEvent(new CustomEvent('ai-insert-text', { detail: text }));
+  };
+
   return (
     <div className="flex flex-col h-full bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-l border-gray-200/60 dark:border-gray-800/60 text-sm overflow-hidden shadow-[-4px_0_24px_rgba(0,0,0,0.02)]">
       <div className="p-5 border-b border-gray-200/60 dark:border-gray-800/60 flex items-center justify-between font-medium bg-white dark:bg-gray-950">
@@ -99,13 +123,13 @@ export function AiSidebar({ doc, documentId }: AiSidebarProps) {
               <div className="absolute inset-x-0 bottom-0 h-4 bg-gradient-to-t from-gray-50 dark:from-gray-900 to-transparent"></div>
             </div>
             
-            <form onSubmit={(e) => { e.preventDefault(); complete(currentText.slice(-500)); }}>
+              <form onSubmit={(e) => { e.preventDefault(); complete(currentText.slice(-500)); }}>
                <button 
                 type="submit"
-                disabled={isLoading || !currentText}
+                disabled={isAutocompleteLoading || !currentText}
                 className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg py-2.5 font-medium transition-all shadow-sm hover:shadow active:scale-[0.98]"
               >
-                {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                {isAutocompleteLoading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
                 Generate Continuation
               </button>
             </form>
@@ -190,9 +214,61 @@ export function AiSidebar({ doc, documentId }: AiSidebarProps) {
         )}
 
         {activeTab === 'ask' && (
-          <div className="flex flex-col items-center justify-center h-full text-gray-500 space-y-3">
-             <MessageSquare size={32} className="text-gray-300 dark:text-gray-700" />
-             <p className="text-center text-xs">Chat functionality is coming soon.</p>
+          <div className="flex flex-col h-full space-y-4">
+             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg border border-indigo-100 dark:border-indigo-800/50 flex-shrink-0">
+              <h3 className="font-medium text-indigo-800 dark:text-indigo-300 mb-1 flex items-center gap-1.5"><MessageSquare size={14} /> AI Chat</h3>
+              <p className="text-indigo-600/80 dark:text-indigo-400/80 text-xs leading-relaxed">
+                Ask questions about your document or request new content to be generated.
+              </p>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto space-y-3 custom-scrollbar p-1 pb-4">
+              {messages.length === 0 && (
+                <div className="text-center text-gray-500 dark:text-gray-400 text-xs my-8">
+                  No messages yet. Ask me anything!
+                </div>
+              )}
+              {messages.map(m => (
+                <div key={m.id} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
+                  <div className={`max-w-[90%] p-3 rounded-xl text-sm ${m.role === 'user' ? 'bg-indigo-600 text-white rounded-tr-sm' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-sm'}`}>
+                    <div className="whitespace-pre-wrap leading-relaxed">{m.content}</div>
+                  </div>
+                  {m.role === 'assistant' && (
+                    <button 
+                      onClick={() => insertIntoEditor(m.content)}
+                      className="mt-1 text-[10px] flex items-center gap-1 text-gray-500 hover:text-indigo-600 transition-colors bg-transparent border-none cursor-pointer px-1 py-0.5"
+                    >
+                      <Plus size={10} /> Insert into document
+                    </button>
+                  )}
+                </div>
+              ))}
+              {isChatLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 p-3 rounded-xl rounded-tl-sm flex items-center gap-2">
+                    <Loader2 size={14} className="animate-spin text-gray-500" />
+                    <span className="text-xs text-gray-500">Thinking...</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <form onSubmit={handleChatSubmit} className="flex gap-2 flex-shrink-0 bg-white dark:bg-gray-950 p-1 border-t border-gray-200 dark:border-gray-800 -mx-4 -mb-4 px-4 py-3">
+              <input
+                className="flex-1 bg-gray-100 dark:bg-gray-900 border border-transparent focus:border-indigo-500 focus:bg-white dark:focus:bg-gray-800 rounded-xl px-4 py-2 text-sm outline-none transition-all dark:text-gray-200"
+                value={input}
+                placeholder="Ask AI..."
+                onChange={(e) => setInput(e.target.value)}
+                disabled={isChatLoading}
+              />
+              <button 
+                type="submit" 
+                disabled={isChatLoading || !input.trim()}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl w-10 flex items-center justify-center transition-all disabled:opacity-50 disabled:active:scale-100 active:scale-95"
+              >
+                <Send size={16} />
+              </button>
+            </form>
           </div>
         )}
       </div>

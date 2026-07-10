@@ -7,7 +7,8 @@ import {
   Undo, Redo,
   Link, Image as ImageIcon, Table as TableIcon,
   Minus, Code, Quote, Highlighter, RemoveFormatting,
-  Smile, Search, Printer
+  Smile, Search, Printer, Subscript as SubscriptIcon, Superscript as SuperscriptIcon,
+  Indent as IndentIcon, Outdent as OutdentIcon
 } from 'lucide-react';
 
 interface EditorToolbarProps {
@@ -77,12 +78,46 @@ export function EditorToolbar({ editor, syncStatus }: EditorToolbarProps) {
         </select>
       </div>
 
-      {/* Typography */}
+      {/* Typography Controls */}
+      <div className="flex items-center pr-2 pl-1 border-r border-gray-300 dark:border-gray-600 gap-1 text-[11px] font-medium text-gray-500 flex-col justify-center">
+        <div className="flex items-center justify-between w-[90px]">
+          <span title="Line Height" className="cursor-help mr-1">LH</span>
+          <select 
+            className="text-xs px-1 rounded bg-transparent border border-transparent outline-none cursor-pointer hover:bg-gray-200/50 dark:hover:bg-gray-700 w-[60px]"
+            onChange={(e) => editor.chain().focus().setLineHeight(e.target.value).run()}
+            value={editor.getAttributes('paragraph').lineHeight || 'normal'}
+          >
+            <option value="normal">Normal</option>
+            <option value="1">1</option>
+            <option value="1.15">1.15</option>
+            <option value="1.5">1.5</option>
+            <option value="2">2</option>
+          </select>
+        </div>
+        <div className="flex items-center justify-between w-[90px]">
+          <span title="Letter Spacing" className="cursor-help mr-1">LS</span>
+          <select 
+            className="text-xs px-1 rounded bg-transparent border border-transparent outline-none cursor-pointer hover:bg-gray-200/50 dark:hover:bg-gray-700 w-[60px]"
+            onChange={(e) => editor.chain().focus().setLetterSpacing(e.target.value).run()}
+            value={editor.getAttributes('textStyle').letterSpacing || 'normal'}
+          >
+            <option value="normal">Normal</option>
+            <option value="-0.05em">Tight</option>
+            <option value="0.05em">Wide</option>
+            <option value="0.1em">Wider</option>
+          </select>
+        </div>
+      </div>
+      
+      {/* Formatting */}
       <div className="flex items-center space-x-0.5 pl-1 pr-2 border-r border-gray-300 dark:border-gray-600">
         <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} icon={<Bold size={16} />} title="Bold (Ctrl+B)" />
         <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} icon={<Italic size={16} />} title="Italic (Ctrl+I)" />
         <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')} icon={<Underline size={16} />} title="Underline (Ctrl+U)" />
         <ToolbarButton onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive('strike')} icon={<Strikethrough size={16} />} title="Strikethrough" />
+        <ToolbarButton onClick={() => editor.chain().focus().toggleSubscript().run()} active={editor.isActive('subscript')} icon={<SubscriptIcon size={16} />} title="Subscript" />
+        <ToolbarButton onClick={() => editor.chain().focus().toggleSuperscript().run()} active={editor.isActive('superscript')} icon={<SuperscriptIcon size={16} />} title="Superscript" />
+        <ToolbarButton onClick={() => editor.chain().focus().toggleCode().run()} active={editor.isActive('code')} icon={<Code size={16} />} title="Inline Code" />
       </div>
 
       {/* Color & Highlight */}
@@ -118,6 +153,9 @@ export function EditorToolbar({ editor, syncStatus }: EditorToolbarProps) {
       <div className="flex items-center space-x-0.5 pl-1 pr-2 border-r border-gray-300 dark:border-gray-600">
         <ToolbarButton onClick={toggleLink} active={editor.isActive('link')} icon={<Link size={16} />} title="Insert Link (Ctrl+K)" />
         <ToolbarButton onClick={addImage} icon={<ImageIcon size={16} />} title="Insert Image" />
+        <ToolbarButton onClick={insertTable} icon={<TableIcon size={16} />} title="Insert Table" />
+        <ToolbarButton onClick={() => editor.chain().focus().setHorizontalRule().run()} icon={<Minus size={16} />} title="Divider" />
+        <ToolbarButton onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive('blockquote')} icon={<Quote size={16} />} title="Quote" />
       </div>
 
       {/* Alignment */}
@@ -126,6 +164,8 @@ export function EditorToolbar({ editor, syncStatus }: EditorToolbarProps) {
         <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('center').run()} active={editor.isActive({ textAlign: 'center' })} icon={<AlignCenter size={16} />} title="Align Center (Ctrl+Shift+E)" />
         <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('right').run()} active={editor.isActive({ textAlign: 'right' })} icon={<AlignRight size={16} />} title="Align Right (Ctrl+Shift+R)" />
         <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('justify').run()} active={editor.isActive({ textAlign: 'justify' })} icon={<AlignJustify size={16} />} title="Justify (Ctrl+Shift+J)" />
+        <ToolbarButton onClick={() => editor.chain().focus().outdent().run()} disabled={!editor.can().outdent()} icon={<OutdentIcon size={16} />} title="Outdent" />
+        <ToolbarButton onClick={() => editor.chain().focus().indent().run()} disabled={!editor.can().indent()} icon={<IndentIcon size={16} />} title="Indent" />
       </div>
 
       {/* Lists */}

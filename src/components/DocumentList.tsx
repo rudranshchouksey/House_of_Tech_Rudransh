@@ -61,6 +61,32 @@ export function DocumentList({ initialDocuments, currentUserId }: DocumentListPr
     );
   };
 
+  const handleRename = async (doc: Document, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const newTitle = window.prompt('Enter new title:', doc.title);
+    if (newTitle === null || newTitle.trim() === '' || newTitle === doc.title) {
+      return;
+    }
+
+    try {
+      setDocuments(prev => prev.map(d => d.id === doc.id ? { ...d, title: newTitle.trim() } : d));
+      
+      const res = await fetch(`/api/documents/${doc.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newTitle.trim() })
+      });
+      
+      if (!res.ok) throw new Error('Failed to rename');
+      toast.success('Document renamed');
+    } catch (error) {
+      setDocuments(prev => prev.map(d => d.id === doc.id ? { ...d, title: doc.title } : d));
+      toast.error('Failed to rename document');
+    }
+  };
+
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -243,6 +269,9 @@ export function DocumentList({ initialDocuments, currentUserId }: DocumentListPr
                       <div className="py-1">
                         <button onClick={(e) => { e.preventDefault(); router.push(`/documents/${doc.id}`); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                           <Edit2 size={14} /> Open
+                        </button>
+                        <button onClick={(e) => handleRename(doc, e)} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                          <Edit2 size={14} /> Rename
                         </button>
                         <button onClick={(e) => handleDuplicate(doc.id, e)} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                           <Copy size={14} /> Duplicate

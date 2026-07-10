@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useDebounce } from 'use-debounce';
-import { Save, CloudOff, CheckCircle2, MoreHorizontal, User, Share, Download, ChevronRight, FileText } from 'lucide-react';
+import { Save, CloudOff, CheckCircle2, MoreHorizontal, User, Share, Download, ChevronRight, FileText, FileDown, FileJson, Printer } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import Link from 'next/link';
 
 interface HeaderProps {
   documentId: string;
@@ -16,6 +17,7 @@ export function Header({ documentId, initialTitle = 'Untitled Document', syncSta
   const [title, setTitle] = useState(initialTitle);
   const [isEditing, setIsEditing] = useState(false);
   const [lastEdited, setLastEdited] = useState<Date>(new Date());
+  const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
   
   // Use a debounced value for the title to save automatically
   const [debouncedTitle] = useDebounce(title, 1000);
@@ -56,6 +58,35 @@ export function Header({ documentId, initialTitle = 'Untitled Document', syncSta
     } else if (e.key === 'Escape') {
       setIsEditing(false);
     }
+  };
+
+  const exportDocument = (format: 'html' | 'txt' | 'md') => {
+    const editorEl = document.querySelector('.ProseMirror');
+    if (!editorEl) return;
+    
+    let content = '';
+    let mimeType = '';
+    
+    if (format === 'html') {
+      content = editorEl.innerHTML;
+      mimeType = 'text/html';
+    } else if (format === 'txt') {
+      content = (editorEl as HTMLElement).innerText;
+      mimeType = 'text/plain';
+    } else if (format === 'md') {
+      // Basic markdown conversion, normally you'd use turndown
+      content = (editorEl as HTMLElement).innerText; 
+      mimeType = 'text/markdown';
+    }
+
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title || 'document'}.${format}`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setIsExportMenuOpen(false);
   };
 
   return (
@@ -113,12 +144,32 @@ export function Header({ documentId, initialTitle = 'Untitled Document', syncSta
 
       <div className="flex items-center space-x-3">
         {/* Export Button */}
-        <button 
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors"
-          title="Export"
-        >
-          <Download size={18} />
-        </button>
+        <div className="relative">
+          <button 
+            onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors flex items-center gap-1"
+            title="Export"
+          >
+            <Download size={18} />
+          </button>
+          
+          {isExportMenuOpen && (
+            <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl overflow-hidden z-50">
+              <button onClick={() => { window.print(); setIsExportMenuOpen(false); }} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2">
+                <Printer size={16} className="text-gray-400" /> Print / PDF
+              </button>
+              <button onClick={() => exportDocument('html')} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2">
+                <FileJson size={16} className="text-gray-400" /> Export HTML
+              </button>
+              <button onClick={() => exportDocument('md')} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2">
+                <FileDown size={16} className="text-gray-400" /> Export Markdown
+              </button>
+              <button onClick={() => exportDocument('txt')} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2">
+                <FileText size={16} className="text-gray-400" /> Export Plain Text
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Theme Toggle */}
         <button 

@@ -20,7 +20,9 @@ import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableHeader } from '@tiptap/extension-table-header';
 import { TableCell } from '@tiptap/extension-table-cell';
-
+import { Subscript } from '@tiptap/extension-subscript';
+import { Superscript } from '@tiptap/extension-superscript';
+import { LineHeight, LetterSpacing, ParagraphSpacing, Indent } from '../lib/typography';
 import * as Y from 'yjs';
 import { EditorToolbar } from './EditorToolbar';
 import { FloatingMenu } from './FloatingMenu';
@@ -62,6 +64,12 @@ export function RichTextEditor({ doc, syncStatus, currentUser }: RichTextEditorP
       TableRow,
       TableHeader,
       TableCell,
+      Subscript,
+      Superscript,
+      LineHeight,
+      LetterSpacing,
+      ParagraphSpacing,
+      Indent,
       // Only attach collaboration extensions if doc is provided
       ...(doc ? [
         Collaboration.configure({
@@ -93,6 +101,25 @@ export function RichTextEditor({ doc, syncStatus, currentUser }: RichTextEditorP
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Listen for ai-insert-text events
+  useEffect(() => {
+    if (!editor) return;
+
+    const handleInsertText = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      const text = customEvent.detail;
+      if (text) {
+        // Insert at current position, or at end if no focus
+        editor.chain().focus().insertContent(text).run();
+      }
+    };
+
+    window.addEventListener('ai-insert-text', handleInsertText);
+    return () => {
+      window.removeEventListener('ai-insert-text', handleInsertText);
+    };
+  }, [editor]);
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden bg-gray-50/50 dark:bg-gray-950/50 transition-colors">

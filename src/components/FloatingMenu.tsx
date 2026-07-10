@@ -1,6 +1,6 @@
 import { Editor } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
-import { Bold, Italic, Underline, Link, Highlighter, Sparkles, RefreshCcw, AlignLeft, Languages, CheckCheck, Loader2 } from 'lucide-react';
+import { Bold, Italic, Underline, Link, Highlighter, Sparkles, RefreshCcw, AlignLeft, Languages, CheckCheck, Loader2, ChevronDown, List, FileText, Expand, Shrink, FileQuestion } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -11,6 +11,7 @@ interface FloatingMenuProps {
 export function FloatingMenu({ editor }: FloatingMenuProps) {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiActionName, setAiActionName] = useState('');
+  const [isAiMenuOpen, setIsAiMenuOpen] = useState(false);
 
   if (!editor) {
     return null;
@@ -41,7 +42,7 @@ export function FloatingMenu({ editor }: FloatingMenuProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [{ role: 'user', content: `${promptPrefix}\n\nText:\n"${selectedText}"` }]
+          messages: [{ role: 'user', content: `${promptPrefix}\n\nSelected Text:\n"${selectedText}"\n\nIf the action asks for something different from replacing the text (like explaining), still return just the explanation. Otherwise, return only the rewritten/modified text without quotes or conversation.` }]
         }),
       });
 
@@ -86,6 +87,7 @@ export function FloatingMenu({ editor }: FloatingMenuProps) {
     } finally {
       setIsAiLoading(false);
       setAiActionName('');
+      setIsAiMenuOpen(false);
     }
   };
 
@@ -106,30 +108,36 @@ export function FloatingMenu({ editor }: FloatingMenuProps) {
           
           <div className="w-px h-5 bg-gray-300 dark:bg-gray-700 mx-1"></div>
           
-          <MenuButton 
-            onClick={() => handleAiAction('Rewriting', 'Rewrite the following text to make it sound better and more professional. Only return the rewritten text, without any conversational filler or quotes around it.')} 
-            icon={<><RefreshCcw size={14} className="mr-1 text-purple-500" /> <span className="text-[13px] font-medium text-purple-600 dark:text-purple-400">Rewrite</span></>} 
-            title="Rewrite" 
-            customClass="px-2"
-          />
-          <MenuButton 
-            onClick={() => handleAiAction('Summarizing', 'Summarize the following text concisely. Only return the summary, without any conversational filler.')} 
-            icon={<><AlignLeft size={14} className="mr-1 text-purple-500" /> <span className="text-[13px] font-medium text-purple-600 dark:text-purple-400">Summarize</span></>} 
-            title="Summarize" 
-            customClass="px-2"
-          />
-          <MenuButton 
-            onClick={() => handleAiAction('Improving', 'Fix any grammar mistakes and improve the writing style of the following text. Only return the improved text, without any conversational filler.')} 
-            icon={<><CheckCheck size={14} className="mr-1 text-purple-500" /> <span className="text-[13px] font-medium text-purple-600 dark:text-purple-400">Improve</span></>} 
-            title="Improve Writing" 
-            customClass="px-2"
-          />
-          <MenuButton 
-            onClick={() => handleAiAction('Translating', 'Translate the following text to English (if it is not English) or to Spanish (if it is English). Only return the translation, without any conversational filler.')} 
-            icon={<><Languages size={14} className="mr-1 text-purple-500" /> <span className="text-[13px] font-medium text-purple-600 dark:text-purple-400">Translate</span></>} 
-            title="Translate" 
-            customClass="px-2"
-          />
+          <div className="relative">
+            <button 
+              onClick={() => setIsAiMenuOpen(!isAiMenuOpen)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-purple-50 dark:hover:bg-purple-900/30 text-purple-600 dark:text-purple-400 transition-colors border border-purple-200 dark:border-purple-800/50"
+            >
+              <Sparkles size={14} />
+              <span className="text-[13px] font-medium">Ask AI</span>
+              <ChevronDown size={14} />
+            </button>
+            
+            {isAiMenuOpen && (
+              <div className="absolute top-full left-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-50 py-1 overflow-hidden">
+                <div className="max-h-64 overflow-y-auto custom-scrollbar">
+                  <AiOption onClick={() => handleAiAction('Continuing', 'Continue writing from the following text naturally.')} icon={<Sparkles size={14} />} label="Continue Writing" />
+                  <AiOption onClick={() => handleAiAction('Rewriting', 'Rewrite the following text to make it better.')} icon={<RefreshCcw size={14} />} label="Rewrite" />
+                  <AiOption onClick={() => handleAiAction('Improving', 'Improve the writing style of the following text.')} icon={<CheckCheck size={14} />} label="Improve Writing" />
+                  <AiOption onClick={() => handleAiAction('Fixing Grammar', 'Fix all grammar and spelling mistakes in the following text.')} icon={<CheckCheck size={14} />} label="Grammar Fix" />
+                  <div className="h-px bg-gray-100 dark:bg-gray-700 my-1"></div>
+                  <AiOption onClick={() => handleAiAction('Summarizing', 'Summarize the following text.')} icon={<AlignLeft size={14} />} label="Summarize" />
+                  <AiOption onClick={() => handleAiAction('Translating', 'Translate the following text to English (if not English) or Spanish (if English).')} icon={<Languages size={14} />} label="Translate" />
+                  <AiOption onClick={() => handleAiAction('Expanding', 'Expand on the following text with more details.')} icon={<Expand size={14} />} label="Expand" />
+                  <AiOption onClick={() => handleAiAction('Shortening', 'Shorten the following text while keeping the main points.')} icon={<Shrink size={14} />} label="Shorten" />
+                  <div className="h-px bg-gray-100 dark:bg-gray-700 my-1"></div>
+                  <AiOption onClick={() => handleAiAction('Explaining', 'Explain the following text in simple terms.')} icon={<FileQuestion size={14} />} label="Explain" />
+                  <AiOption onClick={() => handleAiAction('Generating Bullets', 'Convert the following text into a list of bullet points.')} icon={<List size={14} />} label="Generate Bullet Points" />
+                  <AiOption onClick={() => handleAiAction('Generating Title', 'Generate a short, catchy title based on the following text.')} icon={<FileText size={14} />} label="Generate Title" />
+                </div>
+              </div>
+            )}
+          </div>
         </>
       )}
     </BubbleMenu>
@@ -159,6 +167,18 @@ function MenuButton({
       `}
     >
       {icon}
+    </button>
+  );
+}
+
+function AiOption({ onClick, icon, label }: { onClick: () => void, icon: React.ReactNode, label: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full text-left px-3 py-2 text-[13px] text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
+    >
+      <span className="text-purple-500">{icon}</span>
+      {label}
     </button>
   );
 }

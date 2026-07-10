@@ -1,7 +1,23 @@
 import { notFound } from 'next/navigation';
+import { Metadata, ResolvingMetadata } from 'next';
 import prisma from '@/lib/db';
 import { auth } from '@/auth';
 import { WorkspaceClient } from './WorkspaceClient';
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ id: string }> },
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { id } = await params;
+  const document = await prisma.document.findUnique({
+    where: { id },
+    select: { title: true }
+  });
+
+  return {
+    title: document?.title ? `${document.title} | House of Tech` : 'Untitled Document | House of Tech',
+  };
+}
 
 export default async function DocumentPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
