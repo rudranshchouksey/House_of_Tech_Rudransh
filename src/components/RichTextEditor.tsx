@@ -38,7 +38,9 @@ export function RichTextEditor({ doc, syncStatus, currentUser }: RichTextEditorP
         }),
         CollaborationCursor.configure({
           provider: {
-            awareness
+            awareness,
+            document: doc,
+            doc: doc,
           } as any,
           user: {
             name: currentUser.name,
