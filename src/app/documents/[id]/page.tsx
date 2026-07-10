@@ -34,7 +34,7 @@ export default async function DocumentPage({ params }: { params: Promise<{ id: s
 
 
       {/* Workspace Area */}
-      <WorkspaceClient documentId={document.id} currentUser={currentUser} />
+      <WorkspaceClient documentId={document.id} initialTitle={document.title || 'Untitled Document'} currentUser={currentUser} />
     </div>
   );
 }

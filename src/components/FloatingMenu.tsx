@@ -1,5 +1,5 @@
 import { Editor } from '@tiptap/react';
-import { BubbleMenu } from '@tiptap/extension-bubble-menu';
+import { BubbleMenu } from '@tiptap/react/menus';
 import { Bold, Italic, Underline, Link, Highlighter, Sparkles } from 'lucide-react';
 
 interface FloatingMenuProps {
@@ -24,7 +24,7 @@ export function FloatingMenu({ editor }: FloatingMenuProps) {
   };
 
   return (
-    <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }} className="flex overflow-hidden items-center bg-white dark:bg-gray-800 shadow-xl border border-gray-200 dark:border-gray-700 rounded-lg p-1 space-x-1">
+    <BubbleMenu editor={editor} className="flex overflow-hidden items-center bg-white dark:bg-gray-800 shadow-xl border border-gray-200 dark:border-gray-700 rounded-lg p-1 space-x-1">
       <MenuButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} icon={<Bold size={16} />} title="Bold" />
       <MenuButton onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} icon={<Italic size={16} />} title="Italic" />
       <MenuButton onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')} icon={<Underline size={16} />} title="Underline" />

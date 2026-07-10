@@ -22,8 +22,9 @@ import { TableCell } from '@tiptap/extension-table-cell';
 
 import * as Y from 'yjs';
 import { EditorToolbar } from './EditorToolbar';
-import { SyncStatus } from '@/lib/sync/engine';
 import { FloatingMenu } from './FloatingMenu';
+import SlashCommands, { getSuggestionItems, renderItems } from '../lib/slashCommands';
+import { SyncStatus } from '@/lib/sync/engine';
 
 interface RichTextEditorProps {
   doc: Y.Doc | null;
@@ -62,6 +63,12 @@ export function RichTextEditor({ doc, syncStatus, currentUser }: RichTextEditorP
           field: 'content',
         }),
       ] : []),
+      SlashCommands.configure({
+        suggestion: {
+          items: getSuggestionItems,
+          render: renderItems,
+        },
+      }),
     ],
     editorProps: {
       attributes: {

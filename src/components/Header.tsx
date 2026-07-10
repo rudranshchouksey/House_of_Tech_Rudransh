@@ -7,12 +7,13 @@ import { useTheme } from 'next-themes';
 
 interface HeaderProps {
   documentId: string;
+  initialTitle?: string;
   syncStatus: 'SYNCED' | 'SYNCING' | 'OFFLINE' | 'ERROR' | 'SAVED_LOCALLY';
   currentUser: { id: string; name?: string | null; image?: string | null } | null;
 }
 
-export function Header({ documentId, syncStatus, currentUser }: HeaderProps) {
-  const [title, setTitle] = useState('Untitled Document');
+export function Header({ documentId, initialTitle = 'Untitled Document', syncStatus, currentUser }: HeaderProps) {
+  const [title, setTitle] = useState(initialTitle);
   const [isEditing, setIsEditing] = useState(false);
   const [lastEdited, setLastEdited] = useState<Date>(new Date());
   
@@ -67,34 +68,46 @@ export function Header({ documentId, syncStatus, currentUser }: HeaderProps) {
         </div>
 
         <div className="flex flex-col">
-          {isEditing ? (
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onBlur={() => setIsEditing(false)}
-              onKeyDown={handleKeyDown}
-              autoFocus
-              className="text-lg font-medium bg-transparent border-b-2 border-blue-500 focus:outline-none px-1 min-w-[200px]"
-            />
-          ) : (
-            <h1 
-              onClick={() => setIsEditing(true)}
-              className="text-lg font-medium px-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 cursor-text min-w-[100px]"
-            >
-              {title || 'Untitled Document'}
-            </h1>
-          )}
+          {/* Breadcrumbs */}
+          <div className="flex items-center space-x-1 text-xs text-gray-500 mb-1 px-1">
+             <span>Workspace</span>
+             <span>/</span>
+             <span>Documents</span>
+             <span>/</span>
+             <span className="text-gray-900 dark:text-gray-300 font-medium truncate max-w-[150px]">{title || 'Untitled'}</span>
+          </div>
+
+          <div className="flex items-center">
+            {isEditing ? (
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onBlur={() => setIsEditing(false)}
+                onKeyDown={handleKeyDown}
+                autoFocus
+                className="text-lg font-medium bg-transparent border-b-2 border-blue-500 focus:outline-none px-1 min-w-[200px]"
+              />
+            ) : (
+              <h1 
+                onClick={() => setIsEditing(true)}
+                className="text-lg font-medium px-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 cursor-text min-w-[100px] border border-transparent hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
+                title="Rename"
+              >
+                {title || 'Untitled Document'}
+              </h1>
+            )}
+          </div>
 
           <div className="flex items-center space-x-4 text-xs text-gray-500 px-1 mt-0.5">
             <span className="flex items-center space-x-1">
-              {syncStatus === 'SYNCED' && <><CheckCircle2 size={12} className="text-green-500" /> <span>Saved to cloud</span></>}
+              {syncStatus === 'SYNCED' && <><CheckCircle2 size={12} className="text-green-500" /> <span>Saved</span></>}
               {syncStatus === 'SYNCING' && <><Save size={12} className="animate-pulse text-blue-500" /> <span>Saving...</span></>}
               {syncStatus === 'OFFLINE' && <><CloudOff size={12} className="text-orange-500" /> <span>Offline mode</span></>}
-              {syncStatus === 'SAVED_LOCALLY' && <><Save size={12} className="text-blue-500" /> <span>Saved locally (pending sync)</span></>}
+              {syncStatus === 'SAVED_LOCALLY' && <><CheckCircle2 size={12} className="text-blue-500" /> <span>Saved locally</span></>}
               {syncStatus === 'ERROR' && <><CloudOff size={12} className="text-red-500" /> <span>Error saving</span></>}
             </span>
-            <span>Last edited {lastEdited.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            <span>Edited {lastEdited.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
           </div>
         </div>
       </div>

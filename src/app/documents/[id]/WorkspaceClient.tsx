@@ -8,10 +8,11 @@ import { Header } from '@/components/Header';
 
 interface WorkspaceClientProps {
   documentId: string;
+  initialTitle: string;
   currentUser: { id: string; name: string; color: string };
 }
 
-export function WorkspaceClient({ documentId, currentUser }: WorkspaceClientProps) {
+export function WorkspaceClient({ documentId, initialTitle, currentUser }: WorkspaceClientProps) {
   const syncEngineState = useSyncEngine(documentId);
   const doc = syncEngineState?.doc;
   const status = syncEngineState?.status || 'OFFLINE';
@@ -29,7 +30,7 @@ export function WorkspaceClient({ documentId, currentUser }: WorkspaceClientProp
 
   return (
     <div className="flex flex-col h-full overflow-hidden w-full">
-      <Header documentId={documentId} syncStatus={status} currentUser={currentUser} />
+      <Header documentId={documentId} initialTitle={initialTitle} syncStatus={status} currentUser={currentUser} />
       
       <div className="flex flex-1 overflow-hidden">
       {/* Editor Area */}
