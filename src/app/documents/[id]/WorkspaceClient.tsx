@@ -4,6 +4,7 @@ import { useSyncEngine } from '@/hooks/useSyncEngine';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import VersionTimeline from '@/components/VersionTimeline';
 import { AiSidebar } from '@/components/AiSidebar';
+import { Header } from '@/components/Header';
 
 interface WorkspaceClientProps {
   documentId: string;
@@ -27,7 +28,10 @@ export function WorkspaceClient({ documentId, currentUser }: WorkspaceClientProp
   }
 
   return (
-    <div className="flex flex-1 overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden w-full">
+      <Header documentId={documentId} syncStatus={status} currentUser={currentUser} />
+      
+      <div className="flex flex-1 overflow-hidden">
       {/* Editor Area */}
       <main className="flex-1 flex flex-col p-4 sm:p-6 overflow-hidden">
         <RichTextEditor doc={doc} syncStatus={status} currentUser={currentUser} />
@@ -42,6 +46,7 @@ export function WorkspaceClient({ documentId, currentUser }: WorkspaceClientProp
           <VersionTimeline documentId={documentId} />
         </div>
       </aside>
+      </div>
     </div>
   );
 }

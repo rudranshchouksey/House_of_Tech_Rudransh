@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import * as Y from 'yjs';
-import { Bot, Sparkles, Loader2, GitCommitHorizontal } from 'lucide-react';
+import { Bot, Sparkles, Loader2, GitCommitHorizontal, MessageSquare, PenTool, Languages } from 'lucide-react';
 import { useCompletion } from '@ai-sdk/react';
 
 interface AiSidebarProps {
@@ -10,8 +10,10 @@ interface AiSidebarProps {
   documentId: string;
 }
 
+type Tab = 'autocomplete' | 'summarize' | 'ask';
+
 export function AiSidebar({ doc, documentId }: AiSidebarProps) {
-  const [activeTab, setActiveTab] = useState<'autocomplete' | 'summarize'>('autocomplete');
+  const [activeTab, setActiveTab] = useState<Tab>('autocomplete');
   const [versionId, setVersionId] = useState('');
   const [summary, setSummary] = useState('');
   const [loadingSummary, setLoadingSummary] = useState(false);
@@ -51,11 +53,10 @@ export function AiSidebar({ doc, documentId }: AiSidebarProps) {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
         setCurrentText(doc.getXmlFragment('content').toString());
-      }, 500); // 500ms debounce
+      }, 500);
     };
 
     doc.on('update', handleUpdate);
-    // Set initial text if doc just became available
     setCurrentText(doc.getXmlFragment('content').toString());
 
     return () => {
@@ -65,42 +66,41 @@ export function AiSidebar({ doc, documentId }: AiSidebarProps) {
   }, [doc]);
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800 text-sm">
-      <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2 font-medium text-indigo-600 dark:text-indigo-400">
-        <Bot size={18} />
-        <span>AI Assistant</span>
+    <div className="flex flex-col h-full bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800 text-sm overflow-hidden">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between font-medium">
+        <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+          <Bot size={18} />
+          <span>AI Assistant</span>
+        </div>
       </div>
 
-      <div className="flex border-b border-gray-200 dark:border-gray-800">
-        <button 
-          onClick={() => setActiveTab('autocomplete')}
-          className={`flex-1 py-2 text-center font-medium ${activeTab === 'autocomplete' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
-        >
-          Autocomplete
-        </button>
-        <button 
-          onClick={() => setActiveTab('summarize')}
-          className={`flex-1 py-2 text-center font-medium ${activeTab === 'summarize' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
-        >
-          Summarize
-        </button>
+      <div className="flex border-b border-gray-200 dark:border-gray-800 overflow-x-auto custom-scrollbar bg-gray-50 dark:bg-gray-900/50">
+        <TabButton id="autocomplete" icon={<Sparkles size={14} />} label="Autocomplete" activeTab={activeTab} setActiveTab={setActiveTab} />
+        <TabButton id="summarize" icon={<GitCommitHorizontal size={14} />} label="Summarize" activeTab={activeTab} setActiveTab={setActiveTab} />
+        <TabButton id="ask" icon={<MessageSquare size={14} />} label="Ask AI" activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
 
       <div className="p-4 overflow-y-auto flex-1">
-        {activeTab === 'autocomplete' ? (
+        {activeTab === 'autocomplete' && (
           <div className="space-y-4">
-            <p className="text-gray-500 text-xs">
-              Context is sent to the AI to predict the next few sentences.
-            </p>
-            <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded text-xs text-gray-500 max-h-32 overflow-hidden truncate whitespace-pre-wrap">
+            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg border border-indigo-100 dark:border-indigo-800/50">
+              <h3 className="font-medium text-indigo-800 dark:text-indigo-300 mb-1">Smart Continuation</h3>
+              <p className="text-indigo-600/80 dark:text-indigo-400/80 text-xs leading-relaxed">
+                Let AI continue your thoughts. We analyze your recent context to generate the next logical sentences.
+              </p>
+            </div>
+            
+            <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded-lg border border-gray-200 dark:border-gray-800 text-xs text-gray-500 max-h-32 overflow-hidden truncate whitespace-pre-wrap relative shadow-inner">
+              <div className="absolute inset-x-0 top-0 h-4 bg-gradient-to-b from-gray-50 dark:from-gray-900 to-transparent"></div>
               {currentText.slice(-200) || "Start typing in the document to generate context..."}
+              <div className="absolute inset-x-0 bottom-0 h-4 bg-gradient-to-t from-gray-50 dark:from-gray-900 to-transparent"></div>
             </div>
             
             <form onSubmit={(e) => { e.preventDefault(); complete(currentText.slice(-500)); }}>
                <button 
                 type="submit"
                 disabled={isLoading || !currentText}
-                className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded py-2 font-medium transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg py-2.5 font-medium transition-all shadow-sm hover:shadow active:scale-[0.98]"
               >
                 {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
                 Generate Continuation
@@ -108,50 +108,89 @@ export function AiSidebar({ doc, documentId }: AiSidebarProps) {
             </form>
 
             {error && (
-              <div className="mt-4 p-3 border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800/50 rounded-lg text-red-800 dark:text-red-200 text-xs">
-                <p className="font-semibold mb-1">Error:</p>
+              <div className="mt-4 p-3 border border-red-200 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-800 dark:text-red-200 text-xs shadow-sm">
+                <p className="font-semibold mb-1 flex items-center gap-1"><span className="text-red-500">⚠</span> Error</p>
                 {error.message || 'Failed to generate continuation.'}
               </div>
             )}
+            
             {completion && !error && (
-              <div className="mt-4 p-3 border border-indigo-100 bg-indigo-50 dark:bg-indigo-900/20 dark:border-indigo-800/50 rounded-lg text-gray-800 dark:text-gray-200">
-                <p className="font-semibold text-xs mb-1 text-indigo-600 dark:text-indigo-400">AI Suggestion:</p>
-                {completion}
+              <div className="mt-4 p-4 border border-indigo-200 dark:border-indigo-800 bg-white dark:bg-gray-900 rounded-lg shadow-sm">
+                <p className="font-semibold text-xs mb-2 text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                  <Sparkles size={12} /> Suggestion:
+                </p>
+                <div className="text-gray-800 dark:text-gray-200 leading-relaxed text-sm">
+                  {completion}
+                </div>
               </div>
             )}
           </div>
-        ) : (
+        )}
+
+        {activeTab === 'summarize' && (
           <div className="space-y-4">
-            <p className="text-gray-500 text-xs">
-              Select a version ID to compare against the current document state and generate a smart summary.
-            </p>
+             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-lg border border-indigo-100 dark:border-indigo-800/50">
+              <h3 className="font-medium text-indigo-800 dark:text-indigo-300 mb-1">Version Diff Summary</h3>
+              <p className="text-indigo-600/80 dark:text-indigo-400/80 text-xs leading-relaxed">
+                Compare the current document against a historical snapshot to see what changed.
+              </p>
+            </div>
             
-            <input 
-              type="text" 
-              placeholder="Paste Version ID..." 
-              value={versionId}
-              onChange={(e) => setVersionId(e.target.value)}
-              className="w-full p-2 border border-gray-300 dark:border-gray-700 bg-transparent rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-gray-700 dark:text-gray-300">Version ID</label>
+              <input 
+                type="text" 
+                placeholder="Paste Version ID..." 
+                value={versionId}
+                onChange={(e) => setVersionId(e.target.value)}
+                className="w-full p-2.5 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all"
+              />
+            </div>
 
             <button 
               onClick={handleSummarize}
               disabled={loadingSummary || !versionId}
-              className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded py-2 font-medium transition-colors"
+              className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg py-2.5 font-medium transition-all shadow-sm hover:shadow active:scale-[0.98]"
             >
               {loadingSummary ? <Loader2 size={16} className="animate-spin" /> : <GitCommitHorizontal size={16} />}
               Generate Diff Summary
             </button>
 
             {summary && (
-              <div className="mt-4 p-3 border border-green-100 bg-green-50 dark:bg-green-900/20 dark:border-green-800/50 rounded-lg text-gray-800 dark:text-gray-200">
-                <p className="font-semibold text-xs mb-1 text-green-600 dark:text-green-400">AI Summary:</p>
-                {summary}
+              <div className="mt-4 p-4 border border-green-200 dark:border-green-800 bg-white dark:bg-gray-900 rounded-lg shadow-sm">
+                <p className="font-semibold text-xs mb-2 text-green-600 dark:text-green-400 flex items-center gap-1">
+                  <GitCommitHorizontal size={12} /> AI Summary:
+                </p>
+                <div className="text-gray-800 dark:text-gray-200 leading-relaxed text-sm">
+                  {summary}
+                </div>
               </div>
             )}
           </div>
         )}
+
+        {activeTab === 'ask' && (
+          <div className="flex flex-col items-center justify-center h-full text-gray-500 space-y-3">
+             <MessageSquare size={32} className="text-gray-300 dark:text-gray-700" />
+             <p className="text-center text-xs">Chat functionality is coming soon.</p>
+          </div>
+        )}
       </div>
     </div>
+  );
+}
+
+function TabButton({ id, icon, label, activeTab, setActiveTab }: { id: Tab, icon: React.ReactNode, label: string, activeTab: Tab, setActiveTab: (t: Tab) => void }) {
+  const active = activeTab === id;
+  return (
+    <button 
+      onClick={() => setActiveTab(id)}
+      className={`flex items-center gap-1.5 px-4 py-3 text-xs font-medium whitespace-nowrap transition-colors
+        ${active ? 'text-indigo-600 border-b-2 border-indigo-600 bg-white dark:bg-gray-950' : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border-b-2 border-transparent'}
+      `}
+    >
+      {icon}
+      {label}
+    </button>
   );
 }
