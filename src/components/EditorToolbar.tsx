@@ -47,7 +47,7 @@ export function EditorToolbar({ editor, syncStatus }: EditorToolbarProps) {
   const sizes = ['8', '9', '10', '11', '12', '14', '16', '18', '20', '24', '30', '36', '48', '72'];
 
   return (
-    <div className="flex flex-wrap items-center gap-1 px-3 py-1.5 bg-[#edf2fa] dark:bg-gray-800/80 w-full overflow-x-auto custom-scrollbar border-b border-gray-200 dark:border-gray-800 rounded-full my-2 mx-4 max-w-[calc(100%-2rem)]">
+    <div className="flex flex-wrap items-center gap-1.5 px-3 py-2 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl w-full overflow-x-auto custom-scrollbar border border-gray-200/50 dark:border-gray-800/50 rounded-2xl shadow-sm my-3 mx-auto max-w-[calc(100%-2rem)] md:max-w-4xl transition-all">
       {/* History */}
       <div className="flex items-center space-x-0.5 pr-2 border-r border-gray-300 dark:border-gray-600">
         <ToolbarButton onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} icon={<Undo size={16} />} title="Undo (Ctrl+Z)" />
@@ -160,9 +160,9 @@ function ToolbarButton({
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={`p-1.5 rounded flex items-center justify-center transition-colors
-        ${active ? 'bg-[#c2e7ff] text-[#001d35] dark:bg-blue-900/50 dark:text-blue-200' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700'}
-        ${disabled ? 'opacity-40 cursor-not-allowed' : ''}
+      className={`p-1.5 rounded-lg flex items-center justify-center transition-all duration-200
+        ${active ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300 shadow-inner' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200'}
+        ${disabled ? 'opacity-40 cursor-not-allowed' : 'active:scale-95'}
       `}
     >
       {icon}

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Toaster } from 'sonner';
+import { Footer } from "@/components/Footer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -42,6 +44,8 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Footer />
+          <Toaster position="bottom-right" />
         </ThemeProvider>
       </body>
     </html>

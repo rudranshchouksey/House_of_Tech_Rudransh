@@ -41,20 +41,53 @@ export async function PATCH(
 
   try {
     const body = await request.json();
-    const { title } = body;
+    const { title, isFavorite, isArchived } = body;
 
-    if (!title || typeof title !== 'string') {
-      return NextResponse.json({ error: 'Invalid title' }, { status: 400 });
-    }
+    const dataToUpdate: any = {};
+    if (title !== undefined && typeof title === 'string') dataToUpdate.title = title;
+    if (isFavorite !== undefined && typeof isFavorite === 'boolean') dataToUpdate.isFavorite = isFavorite;
+    if (isArchived !== undefined && typeof isArchived === 'boolean') dataToUpdate.isArchived = isArchived;
 
     const document = await prisma.document.update({
       where: { id },
-      data: { title },
+      data: dataToUpdate,
     });
 
     return NextResponse.json(document);
   } catch (error) {
     console.error('Failed to update document:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id } = await context.params;
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const document = await prisma.document.findUnique({ where: { id } });
+    if (!document) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+    
+    // Check if owner
+    if (document.ownerId !== session.user.id) {
+       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    await prisma.document.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Failed to delete document:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

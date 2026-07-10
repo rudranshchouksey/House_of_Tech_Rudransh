@@ -78,7 +78,7 @@ export function RichTextEditor({ doc, syncStatus, currentUser }: RichTextEditorP
     ],
     editorProps: {
       attributes: {
-        class: 'prose prose-slate dark:prose-invert max-w-none focus:outline-none min-h-[800px] p-10 lg:p-16',
+        class: 'prose prose-slate dark:prose-invert max-w-none focus:outline-none min-h-[800px] p-12 lg:p-20 text-gray-800 dark:text-gray-200 selection:bg-indigo-200 dark:selection:bg-indigo-900/50 leading-relaxed',
       },
     },
   }, [doc]);
@@ -95,15 +95,15 @@ export function RichTextEditor({ doc, syncStatus, currentUser }: RichTextEditorP
   }, []);
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden bg-gray-100 dark:bg-gray-950">
+    <div className="flex flex-col flex-1 overflow-hidden bg-gray-50/50 dark:bg-gray-950/50 transition-colors">
       {/* Fixed Toolbar */}
-      <div className="z-10 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+      <div className="z-20 bg-white/70 dark:bg-gray-950/70 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-800/50 sticky top-0">
         <EditorToolbar editor={editor} syncStatus={syncStatus} />
       </div>
       
       {/* Editor Canvas Area */}
-      <div className="flex-1 overflow-y-auto w-full flex justify-center py-8 px-4 bg-[#f9fbfd] dark:bg-gray-950/50">
-        <div className="w-full max-w-[850px] bg-white dark:bg-gray-900 shadow-md border border-gray-200 dark:border-gray-800 rounded min-h-[1056px] h-fit">
+      <div className="flex-1 overflow-y-auto w-full flex justify-center py-10 px-4 sm:px-8 lg:px-12 bg-gray-100/30 dark:bg-gray-950/30">
+        <div className="w-full max-w-[850px] bg-white dark:bg-gray-900 shadow-xl dark:shadow-2xl shadow-gray-200/50 dark:shadow-black/50 border border-gray-200/80 dark:border-gray-800/80 rounded-2xl min-h-[1056px] h-fit transition-shadow duration-300">
           {doc ? (
             <>
               {!editor?.state.doc.textContent && !editor?.isActive('image') && !editor?.isActive('table') && (

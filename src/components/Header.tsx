@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useDebounce } from 'use-debounce';
-import { Save, CloudOff, CheckCircle2, MoreHorizontal, User, Share } from 'lucide-react';
+import { Save, CloudOff, CheckCircle2, MoreHorizontal, User, Share, Download, ChevronRight, FileText } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 interface HeaderProps {
@@ -59,22 +59,19 @@ export function Header({ documentId, initialTitle = 'Untitled Document', syncSta
   };
 
   return (
-    <header className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10">
-      <div className="flex items-center space-x-4">
+    <header className="flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-gray-800/60 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md sticky top-0 z-30 transition-all">
+      <div className="flex items-center space-x-6">
         {/* Document Icon / Logo */}
-        <div className="w-8 h-8 bg-blue-600 rounded text-white flex items-center justify-center font-bold text-xl">
-          <span className="sr-only">Document</span>
-          📄
+        <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl text-white flex items-center justify-center font-bold shadow-sm ring-1 ring-black/5">
+          <FileText size={20} className="text-white" />
         </div>
 
         <div className="flex flex-col">
           {/* Breadcrumbs */}
-          <div className="flex items-center space-x-1 text-xs text-gray-500 mb-1 px-1">
-             <span>Workspace</span>
-             <span>/</span>
-             <span>Documents</span>
-             <span>/</span>
-             <span className="text-gray-900 dark:text-gray-300 font-medium truncate max-w-[150px]">{title || 'Untitled'}</span>
+          <div className="flex items-center space-x-1.5 text-[13px] font-medium text-gray-500 dark:text-gray-400 mb-0.5 px-1">
+             <span className="hover:text-gray-900 dark:hover:text-gray-200 cursor-pointer transition-colors">Workspace</span>
+             <ChevronRight size={14} className="text-gray-400" />
+             <span className="text-gray-900 dark:text-gray-200 truncate max-w-[200px]">{title || 'Untitled'}</span>
           </div>
 
           <div className="flex items-center">
@@ -86,61 +83,74 @@ export function Header({ documentId, initialTitle = 'Untitled Document', syncSta
                 onBlur={() => setIsEditing(false)}
                 onKeyDown={handleKeyDown}
                 autoFocus
-                className="text-lg font-medium bg-transparent border-b-2 border-blue-500 focus:outline-none px-1 min-w-[200px]"
+                className="text-xl font-bold bg-transparent focus:outline-none px-1 min-w-[250px] text-gray-900 dark:text-white border-b-2 border-indigo-500 placeholder-gray-400"
+                placeholder="Untitled Document"
               />
             ) : (
               <h1 
                 onClick={() => setIsEditing(true)}
-                className="text-lg font-medium px-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 cursor-text min-w-[100px] border border-transparent hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
-                title="Rename"
+                className="text-xl font-bold px-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/60 cursor-text min-w-[150px] border border-transparent transition-all text-gray-900 dark:text-white truncate max-w-[400px]"
+                title="Rename Document"
               >
                 {title || 'Untitled Document'}
               </h1>
             )}
           </div>
 
-          <div className="flex items-center space-x-4 text-xs text-gray-500 px-1 mt-0.5">
-            <span className="flex items-center space-x-1">
-              {syncStatus === 'SYNCED' && <><CheckCircle2 size={12} className="text-green-500" /> <span>Saved</span></>}
-              {syncStatus === 'SYNCING' && <><Save size={12} className="animate-pulse text-blue-500" /> <span>Saving...</span></>}
-              {syncStatus === 'OFFLINE' && <><CloudOff size={12} className="text-orange-500" /> <span>Offline mode</span></>}
-              {syncStatus === 'SAVED_LOCALLY' && <><CheckCircle2 size={12} className="text-blue-500" /> <span>Saved locally</span></>}
+          <div className="flex items-center space-x-4 text-[11px] font-medium text-gray-500 px-1 mt-1">
+            <span className="flex items-center space-x-1.5">
+              {syncStatus === 'SYNCED' && <><CheckCircle2 size={12} className="text-emerald-500" /> <span>Saved to cloud</span></>}
+              {syncStatus === 'SYNCING' && <><Save size={12} className="animate-pulse text-indigo-500" /> <span>Saving changes...</span></>}
+              {syncStatus === 'OFFLINE' && <><CloudOff size={12} className="text-amber-500" /> <span>Offline mode</span></>}
+              {syncStatus === 'SAVED_LOCALLY' && <><CheckCircle2 size={12} className="text-indigo-500" /> <span>Saved locally</span></>}
               {syncStatus === 'ERROR' && <><CloudOff size={12} className="text-red-500" /> <span>Error saving</span></>}
             </span>
+            <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></span>
             <span>Edited {lastEdited.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
           </div>
         </div>
       </div>
 
       <div className="flex items-center space-x-3">
+        {/* Export Button */}
+        <button 
+          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors"
+          title="Export"
+        >
+          <Download size={18} />
+        </button>
+
         {/* Theme Toggle */}
         <button 
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors"
+          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 transition-colors"
           title="Toggle Theme"
         >
           {theme === 'dark' ? '🌞' : '🌙'}
         </button>
 
+        <div className="w-px h-6 bg-gray-200 dark:bg-gray-800 mx-1"></div>
+
         {/* Share Button */}
-        <button className="flex items-center space-x-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 px-4 py-2 rounded-full font-medium text-sm transition-colors">
+        <button className="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-medium text-sm transition-all shadow-sm hover:shadow-md active:scale-95">
           <Share size={16} />
           <span>Share</span>
         </button>
 
         {/* User Avatar */}
-        <div className="relative">
+        <div className="relative ml-2">
           {currentUser?.image ? (
             <img 
               src={currentUser.image} 
               alt={currentUser.name || 'User'} 
-              className="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-700"
+              className="w-9 h-9 rounded-full border-2 border-white dark:border-gray-900 shadow-sm object-cover"
             />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-400 flex items-center justify-center font-bold">
-              {currentUser?.name?.charAt(0) || <User size={16} />}
+            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 dark:from-indigo-900/60 dark:to-purple-900/60 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold border-2 border-white dark:border-gray-900 shadow-sm">
+              {currentUser?.name?.charAt(0)?.toUpperCase() || <User size={16} />}
             </div>
           )}
+          <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-gray-950 rounded-full"></div>
         </div>
       </div>
     </header>

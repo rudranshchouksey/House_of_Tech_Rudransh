@@ -66,11 +66,13 @@ export function AiSidebar({ doc, documentId }: AiSidebarProps) {
   }, [doc]);
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800 text-sm overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between font-medium">
-        <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
-          <Bot size={18} />
-          <span>AI Assistant</span>
+    <div className="flex flex-col h-full bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-l border-gray-200/60 dark:border-gray-800/60 text-sm overflow-hidden shadow-[-4px_0_24px_rgba(0,0,0,0.02)]">
+      <div className="p-5 border-b border-gray-200/60 dark:border-gray-800/60 flex items-center justify-between font-medium bg-white dark:bg-gray-950">
+        <div className="flex items-center gap-2.5 text-indigo-600 dark:text-indigo-400">
+          <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg">
+            <Bot size={18} />
+          </div>
+          <span className="font-semibold text-[15px] text-gray-900 dark:text-gray-100">AI Assistant</span>
         </div>
       </div>
 
@@ -203,8 +205,8 @@ function TabButton({ id, icon, label, activeTab, setActiveTab }: { id: Tab, icon
   return (
     <button 
       onClick={() => setActiveTab(id)}
-      className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-lg transition-colors
-        ${active ? 'text-indigo-700 bg-indigo-50 dark:bg-indigo-900/30 dark:text-indigo-300 shadow-sm' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-200/50 dark:hover:bg-gray-800'}
+      className={`flex items-center gap-1.5 px-3.5 py-2.5 text-[13px] font-medium whitespace-nowrap rounded-xl transition-all duration-200
+        ${active ? 'text-indigo-700 bg-white dark:bg-gray-800 dark:text-indigo-300 shadow-sm ring-1 ring-black/5 dark:ring-white/10' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5'}
       `}
     >
       {icon}

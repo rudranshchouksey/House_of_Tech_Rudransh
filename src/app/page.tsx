@@ -4,6 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { FileText, Plus, LogIn } from "lucide-react";
 import { Role } from "@prisma/client";
+import { DocumentList } from "@/components/DocumentList";
 
 async function createDocument(formData: FormData) {
   'use server';
@@ -88,11 +89,14 @@ export default async function Home() {
 
       <main className="flex-1 max-w-5xl w-full mx-auto p-8">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-semibold dark:text-white">Your Documents</h2>
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Your Documents</h2>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">Manage and collaborate on your files.</p>
+          </div>
           <form action={createDocument}>
             <button 
               type="submit" 
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-sm hover:shadow-indigo-500/20 hover:shadow-lg active:scale-95"
             >
               <Plus size={18} />
               New Document
@@ -100,35 +104,7 @@ export default async function Home() {
           </form>
         </div>
 
-        {documents.length === 0 ? (
-          <div className="text-center py-20 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
-            <FileText size={48} className="mx-auto text-gray-300 dark:text-gray-700 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No documents yet</h3>
-            <p className="text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
-              Create your first document to start collaborating.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {documents.map((doc) => (
-              <Link 
-                key={doc.id} 
-                href={`/documents/${doc.id}`}
-                className="group flex flex-col p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl hover:shadow-md transition-all hover:border-indigo-300 dark:hover:border-indigo-700"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
-                    <FileText size={24} />
-                  </div>
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-1 truncate">{doc.title}</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-auto">
-                  Last updated {doc.updatedAt.toLocaleDateString()}
-                </p>
-              </Link>
-            ))}
-          </div>
-        )}
+        <DocumentList initialDocuments={documents} currentUserId={session.user.id} />
       </main>
     </div>
   );

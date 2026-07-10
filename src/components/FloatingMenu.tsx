@@ -2,6 +2,7 @@ import { Editor } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
 import { Bold, Italic, Underline, Link, Highlighter, Sparkles, RefreshCcw, AlignLeft, Languages, CheckCheck, Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface FloatingMenuProps {
   editor: Editor;
@@ -73,9 +74,15 @@ export function FloatingMenu({ editor }: FloatingMenuProps) {
       if (newText) {
         editor.chain().focus().insertContentAt({ from: selection.from, to: selection.to }, newText.trim()).run();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert('Failed to process AI action.');
+      toast.error('AI Request Failed', {
+        description: error.message || 'Unable to process your request.',
+        action: {
+          label: 'Retry',
+          onClick: () => handleAiAction(action, promptPrefix),
+        },
+      });
     } finally {
       setIsAiLoading(false);
       setAiActionName('');

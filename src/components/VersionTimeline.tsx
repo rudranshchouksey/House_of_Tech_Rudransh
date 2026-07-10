@@ -108,19 +108,21 @@ export default function VersionTimeline({ documentId }: { documentId: string }) 
   if (loading) return <div className="flex justify-center p-8"><div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div></div>;
 
   return (
-    <div className="flex h-full bg-white dark:bg-gray-950 text-sm overflow-hidden">
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col h-full">
-        <div className="flex items-center justify-between mb-4 sticky top-0 bg-white dark:bg-gray-950 z-10 pb-2 border-b border-gray-100 dark:border-gray-800">
-          <div className="flex items-center gap-2 font-medium text-gray-900 dark:text-white">
-            <History size={18} className="text-indigo-600 dark:text-indigo-400" />
-            <h2>Version History</h2>
+    <div className="flex h-full bg-gray-50/50 dark:bg-gray-950/50 text-sm overflow-hidden">
+      <div className="flex-1 overflow-y-auto p-5 flex flex-col h-full">
+        <div className="flex items-center justify-between mb-6 sticky top-0 bg-gray-50/90 dark:bg-gray-950/90 backdrop-blur-md z-10 pb-3 pt-1 border-b border-gray-200/50 dark:border-gray-800/50">
+          <div className="flex items-center gap-2.5 font-semibold text-gray-900 dark:text-white">
+            <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg text-indigo-600 dark:text-indigo-400">
+              <History size={18} />
+            </div>
+            <h2 className="text-[15px]">Version History</h2>
           </div>
           <button 
             onClick={() => setShowSaveForm(!showSaveForm)}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 rounded-full hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition font-medium"
+            className="flex items-center gap-1.5 text-xs px-3.5 py-2 bg-indigo-600 text-white dark:bg-indigo-600 dark:text-white rounded-xl hover:bg-indigo-700 dark:hover:bg-indigo-700 transition-all font-medium shadow-sm hover:shadow active:scale-95"
           >
             <Save size={14} />
-            Capture
+            Capture Snapshot
           </button>
         </div>
 
@@ -159,44 +161,46 @@ export default function VersionTimeline({ documentId }: { documentId: string }) 
              <p className="text-center text-xs">No version history yet.<br/>Save a snapshot to start tracking.</p>
           </div>
         ) : (
-          <div className="space-y-4 pt-2">
+          <div className="space-y-5 pt-2">
             {versions.map((v) => (
-              <div key={v.id} className="relative pl-6 pb-2 border-l-2 border-gray-200 dark:border-gray-800 last:border-transparent">
-                <div className="absolute w-3 h-3 bg-white dark:bg-gray-950 border-2 border-indigo-500 rounded-full -left-[7.5px] top-1"></div>
+              <div key={v.id} className="relative pl-6 pb-2 border-l-2 border-indigo-100 dark:border-indigo-900/30 last:border-transparent group">
+                <div className="absolute w-3 h-3 bg-white dark:bg-gray-950 border-[2.5px] border-indigo-500 rounded-full -left-[7.5px] top-1.5 group-hover:scale-125 transition-transform duration-300 ring-4 ring-white dark:ring-gray-950"></div>
                 
-                <div className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-lg p-3 hover:shadow-sm transition-shadow">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                      <span className="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">v{v.versionNumber}</span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(v.timestamp).toLocaleDateString()} {new Date(v.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                <div className="bg-white dark:bg-gray-900 border border-gray-200/60 dark:border-gray-800/60 rounded-xl p-4 shadow-sm hover:shadow-md transition-all hover:border-indigo-200 dark:hover:border-indigo-800/50">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="font-medium text-gray-900 dark:text-white flex items-center gap-2.5">
+                      <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-2 py-0.5 rounded-md text-[10px] uppercase font-bold tracking-wider shadow-sm">v{v.versionNumber}</span>
+                      <span className="text-[12px] font-medium text-gray-500 dark:text-gray-400">
+                        {new Date(v.timestamp).toLocaleDateString()} at {new Date(v.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
                     </div>
                   </div>
                   
-                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 line-clamp-2">
+                  <p className="text-[13px] text-gray-700 dark:text-gray-300 mb-4 line-clamp-2 leading-relaxed">
                     {v.commitMessage}
                   </p>
                   
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200 dark:border-gray-800">
-                    <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800/60">
+                    <div className="flex items-center gap-2 text-[11px] font-medium text-gray-500">
                       {v.createdBy.image ? (
-                        <img src={v.createdBy.image} alt="" className="w-5 h-5 rounded-full" />
+                        <img src={v.createdBy.image} alt="" className="w-6 h-6 rounded-full border border-gray-200 dark:border-gray-700 object-cover" />
                       ) : (
-                        <div className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"><User size={10} /></div>
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300"><User size={12} /></div>
                       )}
-                      <span className="truncate max-w-[100px]">{v.createdBy.name || v.createdBy.email?.split('@')[0]}</span>
+                      <span className="truncate max-w-[120px]">{v.createdBy.name || v.createdBy.email?.split('@')[0]}</span>
                     </div>
                     
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-2">
                       <button 
                         onClick={() => handlePreview(v.id)}
-                        className="text-xs px-2.5 py-1 text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                        className="text-[11px] font-medium px-3 py-1.5 text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors shadow-sm active:scale-95"
                       >
                         Preview
                       </button>
                       <button 
                         onClick={() => handleRestore(v.id)}
                         title="Restore this version"
-                        className="text-xs p-1 text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 dark:text-indigo-400 border border-transparent rounded hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition"
+                        className="text-[11px] font-medium p-1.5 text-white bg-indigo-600 dark:bg-indigo-600 border border-transparent rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-700 transition-colors shadow-sm active:scale-95"
                       >
                         <RotateCcw size={14} />
                       </button>
