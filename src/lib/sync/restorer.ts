@@ -16,28 +16,15 @@ export function restoreDocumentState(currentDoc: Y.Doc, historicalSnapshotBlob: 
   const historicalDoc = new Y.Doc();
   Y.applyUpdate(historicalDoc, historicalSnapshotBlob);
 
-  const currentText = currentDoc.getText(textKey);
-  const historicalText = historicalDoc.getText(textKey);
+  const currentXml = currentDoc.getXmlFragment(textKey);
+  const historicalXml = historicalDoc.getXmlFragment(textKey);
 
-  const currentString = currentText.toString();
-  const historicalString = historicalText.toString();
-
-  // Diff current against historical to figure out how to transition back.
-  // diff(oldString, newString) -> returns instructions to convert old to new.
-  const differences = diff(currentString, historicalString);
-
-  currentDoc.transact(() => {
-    let cursor = 0;
-
-    for (const [operation, text] of differences) {
-      if (operation === diff.EQUAL) {
-        cursor += text.length;
-      } else if (operation === diff.DELETE) {
-        currentText.delete(cursor, text.length);
-      } else if (operation === diff.INSERT) {
-        currentText.insert(cursor, text);
-        cursor += text.length;
-      }
-    }
-  }, 'time-travel-restore');
+  // Note: Y.XmlFragment does not support flat string insertion like Y.Text.
+  // We cannot use fast-diff to blindly mutate the AST.
+  // The time-travel diffing algorithm must be rewritten to support ProseMirror JSON.
+  // For now, we safely no-op to prevent the Y.Text constructor crash.
+  
+  console.warn('[restorer] Time-travel restoration for rich-text AST is not yet implemented.');
+  
+  historicalDoc.destroy();
 }

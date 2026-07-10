@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import * as Y from 'yjs';
 import { Bot, Sparkles, Loader2, GitCommitHorizontal } from 'lucide-react';
 import { useCompletion } from '@ai-sdk/react';
@@ -41,7 +41,28 @@ export function AiSidebar({ doc, documentId }: AiSidebarProps) {
     }
   };
 
-  const currentText = doc?.getXmlFragment('content').toString() || '';
+  const [currentText, setCurrentText] = useState(() => doc?.getXmlFragment('content').toString() || '');
+
+  useEffect(() => {
+    if (!doc) return;
+
+    let timeout: ReturnType<typeof setTimeout>;
+    const handleUpdate = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        setCurrentText(doc.getXmlFragment('content').toString());
+      }, 500); // 500ms debounce
+    };
+
+    doc.on('update', handleUpdate);
+    // Set initial text if doc just became available
+    setCurrentText(doc.getXmlFragment('content').toString());
+
+    return () => {
+      clearTimeout(timeout);
+      doc.off('update', handleUpdate);
+    };
+  }, [doc]);
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800 text-sm">

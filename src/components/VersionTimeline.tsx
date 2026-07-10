@@ -52,7 +52,8 @@ export default function VersionTimeline({ documentId }: { documentId: string }) 
       const tempDoc = new Doc();
       applyUpdate(tempDoc, snapshotBlob);
       
-      setPreviewContent(tempDoc.getText('content').toString());
+      setPreviewContent(tempDoc.getXmlFragment('content').toString());
+      tempDoc.destroy();
     } catch (error) {
       console.error(error);
       setPreviewContent('Failed to load preview.');

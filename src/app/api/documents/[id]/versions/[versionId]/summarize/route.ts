@@ -25,8 +25,8 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
       const historicalDoc = new Y.Doc();
       Y.applyUpdate(historicalDoc, new Uint8Array(versionRecord.snapshotBlob));
 
-      const currentText = currentDoc.getText('content').toString();
-      const historicalText = historicalDoc.getText('content').toString();
+      const currentText = currentDoc.getXmlFragment('content').toString();
+      const historicalText = historicalDoc.getXmlFragment('content').toString();
 
       const differences = diff(historicalText, currentText);
       let diffSummary = '';
