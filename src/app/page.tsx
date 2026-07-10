@@ -32,7 +32,7 @@ async function createDocument(formData: FormData) {
 export default async function Home() {
   const session = await auth();
 
-  if (!session || !session.user) {
+  if (!session || !session.user || !session.user.id) {
     return (
       <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-black font-sans text-gray-900 dark:text-gray-100">
         <main className="flex-1 flex flex-col items-center justify-center p-8 text-center">
@@ -57,12 +57,14 @@ export default async function Home() {
     );
   }
 
+  const userId = session.user.id;
+
   // Dashboard for authenticated users
   const documents = await prisma.document.findMany({
     where: {
       OR: [
-        { ownerId: session.user.id },
-        { collaborators: { some: { userId: session.user.id } } }
+        { ownerId: userId },
+        { collaborators: { some: { userId: userId } } }
       ]
     },
     orderBy: { updatedAt: 'desc' }
@@ -104,7 +106,7 @@ export default async function Home() {
           </form>
         </div>
 
-        <DocumentList initialDocuments={documents} currentUserId={session.user.id!} />
+        <DocumentList initialDocuments={documents} currentUserId={userId} />
       </main>
     </div>
   );
