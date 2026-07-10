@@ -104,7 +104,7 @@ export default async function Home() {
           </form>
         </div>
 
-        <DocumentList initialDocuments={documents} currentUserId={session.user.id} />
+        <DocumentList initialDocuments={documents} currentUserId={session.user.id!} />
       </main>
     </div>
   );
