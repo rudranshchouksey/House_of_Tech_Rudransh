@@ -1,5 +1,26 @@
 import { Extension } from '@tiptap/core';
 
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    lineHeight: {
+      setLineHeight: (lineHeight: string) => ReturnType;
+      unsetLineHeight: () => ReturnType;
+    };
+    letterSpacing: {
+      setLetterSpacing: (letterSpacing: string) => ReturnType;
+      unsetLetterSpacing: () => ReturnType;
+    };
+    paragraphSpacing: {
+      setParagraphSpacing: (marginBottom: string) => ReturnType;
+      unsetParagraphSpacing: () => ReturnType;
+    };
+    indent: {
+      indent: () => ReturnType;
+      outdent: () => ReturnType;
+    };
+  }
+}
+
 export const LineHeight = Extension.create({
   name: 'lineHeight',
   addOptions() {

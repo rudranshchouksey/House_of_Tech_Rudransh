@@ -231,11 +231,11 @@ export function AiSidebar({ doc, documentId }: AiSidebarProps) {
               {messages.map(m => (
                 <div key={m.id} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
                   <div className={`max-w-[90%] p-3 rounded-xl text-sm ${m.role === 'user' ? 'bg-indigo-600 text-white rounded-tr-sm' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-sm'}`}>
-                    <div className="whitespace-pre-wrap leading-relaxed">{m.content}</div>
+                    <div className="whitespace-pre-wrap leading-relaxed">{m.parts.map(p => p.type === 'text' ? p.text : '').join('')}</div>
                   </div>
                   {m.role === 'assistant' && (
                     <button 
-                      onClick={() => insertIntoEditor(m.content)}
+                      onClick={() => insertIntoEditor(m.parts.map(p => p.type === 'text' ? p.text : '').join(''))}
                       className="mt-1 text-[10px] flex items-center gap-1 text-gray-500 hover:text-indigo-600 transition-colors bg-transparent border-none cursor-pointer px-1 py-0.5"
                     >
                       <Plus size={10} /> Insert into document
