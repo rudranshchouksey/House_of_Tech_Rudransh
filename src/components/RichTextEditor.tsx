@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/extension-bubble-menu';
 import { StarterKit } from '@tiptap/starter-kit';
@@ -23,7 +24,9 @@ import { TableCell } from '@tiptap/extension-table-cell';
 import * as Y from 'yjs';
 import { EditorToolbar } from './EditorToolbar';
 import { FloatingMenu } from './FloatingMenu';
+import { CommandPalette } from './CommandPalette';
 import SlashCommands, { getSuggestionItems, renderItems } from '../lib/slashCommands';
+import { FontSize } from '../lib/fontSize';
 import { SyncStatus } from '@/lib/sync/engine';
 
 interface RichTextEditorProps {
@@ -33,6 +36,8 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({ doc, syncStatus, currentUser }: RichTextEditorProps) {
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -44,6 +49,7 @@ export function RichTextEditor({ doc, syncStatus, currentUser }: RichTextEditorP
       }),
       TextStyle,
       FontFamily,
+      FontSize,
       Color,
       Highlight.configure({ multicolor: true }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
@@ -77,6 +83,17 @@ export function RichTextEditor({ doc, syncStatus, currentUser }: RichTextEditorP
     },
   }, [doc]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setIsCommandPaletteOpen(true);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <div className="flex flex-col flex-1 overflow-hidden bg-gray-100 dark:bg-gray-950">
       {/* Fixed Toolbar */}
@@ -85,21 +102,46 @@ export function RichTextEditor({ doc, syncStatus, currentUser }: RichTextEditorP
       </div>
       
       {/* Editor Canvas Area */}
-      <div className="flex-1 overflow-y-auto w-full flex justify-center py-8 px-4">
-        <div className="w-full max-w-[850px] bg-white dark:bg-gray-900 shadow-sm border border-gray-200 dark:border-gray-800 rounded min-h-[800px]">
+      <div className="flex-1 overflow-y-auto w-full flex justify-center py-8 px-4 bg-[#f9fbfd] dark:bg-gray-950/50">
+        <div className="w-full max-w-[850px] bg-white dark:bg-gray-900 shadow-md border border-gray-200 dark:border-gray-800 rounded min-h-[1056px] h-fit">
           {doc ? (
             <>
+              {!editor?.state.doc.textContent && !editor?.isActive('image') && !editor?.isActive('table') && (
+                <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center opacity-50 p-8 text-center mt-32">
+                  <div className="w-32 h-32 mb-6 text-gray-300 dark:text-gray-700">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
+                      <line x1="10" y1="9" x2="8" y2="9" />
+                    </svg>
+                  </div>
+                  <h3 className="text-2xl font-semibold text-gray-400 dark:text-gray-500 mb-2">Ready to create?</h3>
+                  <p className="text-gray-400 dark:text-gray-500">Start typing to begin, or type <kbd className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700 font-mono">/</kbd> to insert commands.</p>
+                </div>
+              )}
               {editor && <FloatingMenu editor={editor} />}
-              <EditorContent editor={editor} />
+              <div className="relative z-10">
+                <EditorContent editor={editor} />
+              </div>
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center min-h-[800px] text-gray-400">
-              <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <div className="flex flex-col items-center justify-center min-h-[1056px] text-gray-400">
+              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
               <p>Loading editor...</p>
             </div>
           )}
         </div>
       </div>
+      
+      {editor && (
+        <CommandPalette 
+          isOpen={isCommandPaletteOpen} 
+          onClose={() => setIsCommandPaletteOpen(false)} 
+          editor={editor} 
+        />
+      )}
     </div>
   );
 }

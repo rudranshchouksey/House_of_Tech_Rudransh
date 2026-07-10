@@ -6,9 +6,9 @@ import {
   List, ListOrdered, CheckSquare,
   Undo, Redo,
   Link, Image as ImageIcon, Table as TableIcon,
-  Minus, Code, Quote, Highlighter, RemoveFormatting
+  Minus, Code, Quote, Highlighter, RemoveFormatting,
+  Smile, Search, Printer
 } from 'lucide-react';
-import { useState } from 'react';
 
 interface EditorToolbarProps {
   editor: Editor | null;
@@ -17,7 +17,7 @@ interface EditorToolbarProps {
 
 export function EditorToolbar({ editor, syncStatus }: EditorToolbarProps) {
   if (!editor) {
-    return <div className="h-12 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 animate-pulse" />;
+    return <div className="h-12 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 animate-pulse" />;
   }
 
   const toggleLink = () => {
@@ -43,20 +43,22 @@ export function EditorToolbar({ editor, syncStatus }: EditorToolbarProps) {
     editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
   };
 
-  const fonts = ['Inter', 'Arial', 'Georgia', 'Times New Roman', 'Courier New'];
+  const fonts = ['Inter', 'Roboto', 'Poppins', 'Open Sans', 'Lato', 'Arial', 'Georgia', 'Times New Roman', 'Monospace'];
+  const sizes = ['8', '9', '10', '11', '12', '14', '16', '18', '20', '24', '30', '36', '48', '72'];
 
   return (
-    <div className="flex flex-wrap items-center gap-1 p-2 bg-gray-50 dark:bg-gray-900 w-full overflow-x-auto custom-scrollbar">
+    <div className="flex flex-wrap items-center gap-1 px-3 py-1.5 bg-[#edf2fa] dark:bg-gray-800/80 w-full overflow-x-auto custom-scrollbar border-b border-gray-200 dark:border-gray-800 rounded-full my-2 mx-4 max-w-[calc(100%-2rem)]">
       {/* History */}
-      <div className="flex items-center space-x-1 pr-2 border-r border-gray-300 dark:border-gray-700">
-        <ToolbarButton onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} icon={<Undo size={16} />} title="Undo" />
-        <ToolbarButton onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()} icon={<Redo size={16} />} title="Redo" />
+      <div className="flex items-center space-x-0.5 pr-2 border-r border-gray-300 dark:border-gray-600">
+        <ToolbarButton onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} icon={<Undo size={16} />} title="Undo (Ctrl+Z)" />
+        <ToolbarButton onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()} icon={<Redo size={16} />} title="Redo (Ctrl+Y)" />
+        <ToolbarButton onClick={() => {}} disabled icon={<Printer size={16} />} title="Print" />
       </div>
 
-      {/* Font Family (Simple Select for now) */}
-      <div className="flex items-center pr-2 border-r border-gray-300 dark:border-gray-700">
+      {/* Font Family */}
+      <div className="flex items-center pr-2 pl-1 border-r border-gray-300 dark:border-gray-600">
         <select 
-          className="text-sm p-1 rounded bg-transparent border-none outline-none cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800"
+          className="text-sm px-2 py-1 rounded bg-transparent border-none outline-none cursor-pointer hover:bg-gray-200/50 dark:hover:bg-gray-700 w-[120px] font-medium text-gray-700 dark:text-gray-200"
           onChange={(e) => editor.chain().focus().setFontFamily(e.target.value).run()}
           value={editor.getAttributes('textStyle').fontFamily || 'Inter'}
         >
@@ -64,32 +66,19 @@ export function EditorToolbar({ editor, syncStatus }: EditorToolbarProps) {
         </select>
       </div>
 
-      {/* Headings */}
-      <div className="flex items-center pr-2 border-r border-gray-300 dark:border-gray-700">
+      {/* Font Size */}
+      <div className="flex items-center pr-2 border-r border-gray-300 dark:border-gray-600">
         <select 
-          className="text-sm p-1 rounded bg-transparent border-none outline-none cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 w-24"
-          onChange={(e) => {
-            const val = e.target.value;
-            if (val === '0') editor.chain().focus().setParagraph().run();
-            else editor.chain().focus().toggleHeading({ level: parseInt(val) as any }).run();
-          }}
-          value={
-            editor.isActive('heading', { level: 1 }) ? '1' :
-            editor.isActive('heading', { level: 2 }) ? '2' :
-            editor.isActive('heading', { level: 3 }) ? '3' :
-            editor.isActive('heading', { level: 4 }) ? '4' : '0'
-          }
+          className="text-sm px-1 py-1 rounded bg-transparent border-none outline-none cursor-pointer hover:bg-gray-200/50 dark:hover:bg-gray-700 w-[55px] font-medium text-gray-700 dark:text-gray-200"
+          onChange={(e) => editor.chain().focus().setFontSize(`${e.target.value}px`).run()}
+          value={(editor.getAttributes('textStyle').fontSize || '16px').replace('px', '')}
         >
-          <option value="0">Normal text</option>
-          <option value="1">Heading 1</option>
-          <option value="2">Heading 2</option>
-          <option value="3">Heading 3</option>
-          <option value="4">Heading 4</option>
+          {sizes.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
 
       {/* Typography */}
-      <div className="flex items-center space-x-1 pr-2 border-r border-gray-300 dark:border-gray-700">
+      <div className="flex items-center space-x-0.5 pl-1 pr-2 border-r border-gray-300 dark:border-gray-600">
         <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} icon={<Bold size={16} />} title="Bold (Ctrl+B)" />
         <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} icon={<Italic size={16} />} title="Italic (Ctrl+I)" />
         <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')} icon={<Underline size={16} />} title="Underline (Ctrl+U)" />
@@ -97,47 +86,57 @@ export function EditorToolbar({ editor, syncStatus }: EditorToolbarProps) {
       </div>
 
       {/* Color & Highlight */}
-      <div className="flex items-center space-x-1 pr-2 border-r border-gray-300 dark:border-gray-700">
-        <input 
-          type="color" 
-          onInput={event => editor.chain().focus().setColor((event.target as HTMLInputElement).value).run()}
-          value={editor.getAttributes('textStyle').color || '#000000'}
-          className="w-6 h-6 p-0 border-0 rounded cursor-pointer"
-          title="Text Color"
-        />
-        <input 
-          type="color" 
-          onInput={event => editor.chain().focus().toggleHighlight({ color: (event.target as HTMLInputElement).value }).run()}
-          value={editor.getAttributes('highlight').color || '#ffff00'}
-          className="w-6 h-6 p-0 border-0 rounded cursor-pointer"
-          title="Highlight Color"
-        />
-        <ToolbarButton onClick={() => editor.chain().focus().unsetAllMarks().run()} icon={<RemoveFormatting size={16} />} title="Clear Formatting" />
+      <div className="flex items-center space-x-1 pl-1 pr-2 border-r border-gray-300 dark:border-gray-600">
+        <div className="relative flex items-center justify-center p-1 hover:bg-gray-200/50 dark:hover:bg-gray-700 rounded cursor-pointer" title="Text Color">
+          <div className="flex flex-col items-center">
+            <span className="text-[12px] leading-[10px] font-bold text-gray-700 dark:text-gray-200">A</span>
+            <div className="w-3 h-1 mt-[2px]" style={{ backgroundColor: editor.getAttributes('textStyle').color || '#000000' }} />
+          </div>
+          <input 
+            type="color" 
+            onInput={event => editor.chain().focus().setColor((event.target as HTMLInputElement).value).run()}
+            value={editor.getAttributes('textStyle').color || '#000000'}
+            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+          />
+        </div>
+
+        <div className="relative flex items-center justify-center p-1 hover:bg-gray-200/50 dark:hover:bg-gray-700 rounded cursor-pointer" title="Highlight Color">
+          <div className="flex flex-col items-center">
+            <Highlighter size={14} className="text-gray-700 dark:text-gray-200" />
+            <div className="w-3 h-1 mt-[2px]" style={{ backgroundColor: editor.getAttributes('highlight').color || 'transparent' }} />
+          </div>
+          <input 
+            type="color" 
+            onInput={event => editor.chain().focus().toggleHighlight({ color: (event.target as HTMLInputElement).value }).run()}
+            value={editor.getAttributes('highlight').color || '#ffff00'}
+            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+          />
+        </div>
+      </div>
+
+      {/* Insert */}
+      <div className="flex items-center space-x-0.5 pl-1 pr-2 border-r border-gray-300 dark:border-gray-600">
+        <ToolbarButton onClick={toggleLink} active={editor.isActive('link')} icon={<Link size={16} />} title="Insert Link (Ctrl+K)" />
+        <ToolbarButton onClick={addImage} icon={<ImageIcon size={16} />} title="Insert Image" />
       </div>
 
       {/* Alignment */}
-      <div className="flex items-center space-x-1 pr-2 border-r border-gray-300 dark:border-gray-700">
-        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('left').run()} active={editor.isActive({ textAlign: 'left' })} icon={<AlignLeft size={16} />} title="Align Left" />
-        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('center').run()} active={editor.isActive({ textAlign: 'center' })} icon={<AlignCenter size={16} />} title="Align Center" />
-        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('right').run()} active={editor.isActive({ textAlign: 'right' })} icon={<AlignRight size={16} />} title="Align Right" />
-        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('justify').run()} active={editor.isActive({ textAlign: 'justify' })} icon={<AlignJustify size={16} />} title="Justify" />
+      <div className="flex items-center space-x-0.5 pl-1 pr-2 border-r border-gray-300 dark:border-gray-600">
+        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('left').run()} active={editor.isActive({ textAlign: 'left' })} icon={<AlignLeft size={16} />} title="Align Left (Ctrl+Shift+L)" />
+        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('center').run()} active={editor.isActive({ textAlign: 'center' })} icon={<AlignCenter size={16} />} title="Align Center (Ctrl+Shift+E)" />
+        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('right').run()} active={editor.isActive({ textAlign: 'right' })} icon={<AlignRight size={16} />} title="Align Right (Ctrl+Shift+R)" />
+        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('justify').run()} active={editor.isActive({ textAlign: 'justify' })} icon={<AlignJustify size={16} />} title="Justify (Ctrl+Shift+J)" />
       </div>
 
       {/* Lists */}
-      <div className="flex items-center space-x-1 pr-2 border-r border-gray-300 dark:border-gray-700">
-        <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')} icon={<List size={16} />} title="Bullet List" />
-        <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')} icon={<ListOrdered size={16} />} title="Numbered List" />
+      <div className="flex items-center space-x-0.5 pl-1 pr-2 border-r border-gray-300 dark:border-gray-600">
+        <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')} icon={<List size={16} />} title="Bulleted List (Ctrl+Shift+8)" />
+        <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')} icon={<ListOrdered size={16} />} title="Numbered List (Ctrl+Shift+7)" />
         <ToolbarButton onClick={() => editor.chain().focus().toggleTaskList().run()} active={editor.isActive('taskList')} icon={<CheckSquare size={16} />} title="Checklist" />
       </div>
 
-      {/* Insertions */}
-      <div className="flex items-center space-x-1 pr-2">
-        <ToolbarButton onClick={toggleLink} active={editor.isActive('link')} icon={<Link size={16} />} title="Insert Link" />
-        <ToolbarButton onClick={addImage} icon={<ImageIcon size={16} />} title="Insert Image" />
-        <ToolbarButton onClick={insertTable} active={editor.isActive('table')} icon={<TableIcon size={16} />} title="Insert Table" />
-        <ToolbarButton onClick={() => editor.chain().focus().setHorizontalRule().run()} icon={<Minus size={16} />} title="Horizontal Rule" />
-        <ToolbarButton onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive('blockquote')} icon={<Quote size={16} />} title="Quote" />
-        <ToolbarButton onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={editor.isActive('codeBlock')} icon={<Code size={16} />} title="Code Block" />
+      <div className="flex items-center space-x-0.5 pl-1">
+        <ToolbarButton onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()} icon={<RemoveFormatting size={16} />} title="Clear Formatting" />
       </div>
     </div>
   );
@@ -162,8 +161,8 @@ function ToolbarButton({
       disabled={disabled}
       title={title}
       className={`p-1.5 rounded flex items-center justify-center transition-colors
-        ${active ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800'}
-        ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+        ${active ? 'bg-[#c2e7ff] text-[#001d35] dark:bg-blue-900/50 dark:text-blue-200' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700'}
+        ${disabled ? 'opacity-40 cursor-not-allowed' : ''}
       `}
     >
       {icon}

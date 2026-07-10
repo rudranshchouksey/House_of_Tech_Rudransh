@@ -10,7 +10,7 @@ interface AiSidebarProps {
   documentId: string;
 }
 
-type Tab = 'autocomplete' | 'summarize' | 'ask';
+type Tab = 'autocomplete' | 'summarize' | 'grammar' | 'ask';
 
 export function AiSidebar({ doc, documentId }: AiSidebarProps) {
   const [activeTab, setActiveTab] = useState<Tab>('autocomplete');
@@ -74,9 +74,10 @@ export function AiSidebar({ doc, documentId }: AiSidebarProps) {
         </div>
       </div>
 
-      <div className="flex border-b border-gray-200 dark:border-gray-800 overflow-x-auto custom-scrollbar bg-gray-50 dark:bg-gray-900/50">
-        <TabButton id="autocomplete" icon={<Sparkles size={14} />} label="Autocomplete" activeTab={activeTab} setActiveTab={setActiveTab} />
+      <div className="flex border-b border-gray-200 dark:border-gray-800 overflow-x-auto custom-scrollbar bg-gray-50 dark:bg-gray-900/50 p-1 space-x-1">
+        <TabButton id="autocomplete" icon={<PenTool size={14} />} label="Continue" activeTab={activeTab} setActiveTab={setActiveTab} />
         <TabButton id="summarize" icon={<GitCommitHorizontal size={14} />} label="Summarize" activeTab={activeTab} setActiveTab={setActiveTab} />
+        <TabButton id="grammar" icon={<Sparkles size={14} />} label="Grammar" activeTab={activeTab} setActiveTab={setActiveTab} />
         <TabButton id="ask" icon={<MessageSquare size={14} />} label="Ask AI" activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
 
@@ -169,6 +170,23 @@ export function AiSidebar({ doc, documentId }: AiSidebarProps) {
           </div>
         )}
 
+        {activeTab === 'grammar' && (
+          <div className="space-y-4">
+             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl border border-indigo-100 dark:border-indigo-800/50 shadow-sm">
+              <h3 className="font-semibold text-indigo-800 dark:text-indigo-300 mb-1 flex items-center gap-2">
+                <Sparkles size={16} /> Grammar & Style
+              </h3>
+              <p className="text-indigo-600/80 dark:text-indigo-400/80 text-xs leading-relaxed">
+                Highlight text in the editor and select "Improve Writing" from the floating menu to fix grammar and improve clarity.
+              </p>
+            </div>
+            <div className="flex flex-col items-center justify-center py-8 text-gray-500 space-y-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-800">
+               <Languages size={24} className="text-gray-400 dark:text-gray-600" />
+               <p className="text-center text-xs">Awaiting text selection...</p>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'ask' && (
           <div className="flex flex-col items-center justify-center h-full text-gray-500 space-y-3">
              <MessageSquare size={32} className="text-gray-300 dark:text-gray-700" />
@@ -185,8 +203,8 @@ function TabButton({ id, icon, label, activeTab, setActiveTab }: { id: Tab, icon
   return (
     <button 
       onClick={() => setActiveTab(id)}
-      className={`flex items-center gap-1.5 px-4 py-3 text-xs font-medium whitespace-nowrap transition-colors
-        ${active ? 'text-indigo-600 border-b-2 border-indigo-600 bg-white dark:bg-gray-950' : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border-b-2 border-transparent'}
+      className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-lg transition-colors
+        ${active ? 'text-indigo-700 bg-indigo-50 dark:bg-indigo-900/30 dark:text-indigo-300 shadow-sm' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-200/50 dark:hover:bg-gray-800'}
       `}
     >
       {icon}
