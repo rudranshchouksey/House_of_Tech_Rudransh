@@ -35,7 +35,7 @@ export function AiSidebar({ doc, documentId }: AiSidebarProps) {
   const handleChatSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-    sendMessage({ role: 'user', content: input });
+    sendMessage({ text: input });
     setInput('');
   };
 
